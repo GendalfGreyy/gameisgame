@@ -1,0 +1,15 @@
+{
+  "name": "@game-is-game/api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "NestJS backend — auth, events, check-ins, points, payments, moderation.",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'TODO: nest build (phase 2)' && exit 0",
+    "dev": "echo 'TODO: nest start --watch (phase 2)' && exit 0",
+    "test": "echo 'TODO: vitest (phase 2)' && exit 0",
+    "lint": "echo 'lint runs from root' && exit 0",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  }
+}

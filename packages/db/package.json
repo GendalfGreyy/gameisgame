@@ -1,0 +1,14 @@
+{
+  "name": "@game-is-game/db",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Prisma schema, migrations, seed scripts. PostgreSQL + PostGIS.",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'TODO: prisma generate (phase 1)' && exit 0",
+    "test": "echo 'no tests' && exit 0",
+    "lint": "echo 'no lint (prisma-managed)' && exit 0",
+    "typecheck": "echo 'no typecheck (prisma-managed)' && exit 0",
+    "clean": "rm -rf dist .turbo node_modules/.prisma"
+  }
+}

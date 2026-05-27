@@ -1,0 +1,15 @@
+{
+  "name": "@game-is-game/bot",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Telegram bot (grammY) — commands, deep links, notification consumer.",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'TODO: tsc build (phase 7)' && exit 0",
+    "dev": "echo 'TODO: tsx watch (phase 7)' && exit 0",
+    "test": "echo 'TODO: vitest (phase 7)' && exit 0",
+    "lint": "echo 'lint runs from root' && exit 0",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  }
+}
