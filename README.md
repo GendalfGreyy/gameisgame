@@ -5,10 +5,15 @@ Telegram Mini App: nearby events, check-ins, points, leaderboards, communities, 
 ## Quickstart
 
 ```bash
-# Prereqs: Node 22+, pnpm 9+
+# Prereqs: Node 22+, pnpm 9+, Docker
 nvm use                  # picks up .nvmrc
 pnpm install
-cp .env.example .env     # then fill in real values
+cp .env.example .env     # then fill in real values (bot token, JWT secrets)
+
+# Local infra
+docker compose up -d
+pnpm --filter @game-is-game/db prisma migrate dev --name init
+pnpm --filter @game-is-game/db prisma db seed
 
 # Develop (all apps in parallel)
 pnpm dev
