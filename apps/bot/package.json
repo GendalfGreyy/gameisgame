@@ -5,11 +5,21 @@
   "description": "Telegram bot (grammY) — commands, deep links, notification consumer.",
   "type": "module",
   "scripts": {
-    "build": "echo 'TODO: tsc build (phase 7)' && exit 0",
-    "dev": "echo 'TODO: tsx watch (phase 7)' && exit 0",
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "env -u TELEGRAM_BOT_TOKEN node --env-file=../../.env ./node_modules/tsx/dist/cli.mjs watch src/main.ts",
+    "start": "node dist/main.js",
     "test": "echo 'TODO: vitest (phase 7)' && exit 0",
     "lint": "echo 'lint runs from root' && exit 0",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@game-is-game/shared": "workspace:*",
+    "bullmq": "^5.34.8",
+    "grammy": "^1.35.0",
+    "ioredis": "^5.4.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
   }
 }
