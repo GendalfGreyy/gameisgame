@@ -10,4 +10,7 @@ export const botConfig = {
   token: required('TELEGRAM_BOT_TOKEN'),
   redisUrl: required('REDIS_URL'),
   webappUrl: process.env.TELEGRAM_WEBAPP_URL ?? 'http://localhost:5173',
+  apiUrl: process.env.API_PUBLIC_URL ?? 'http://localhost:3001',
+  /** Static token for internal api routes; squad linking is disabled when unset. */
+  serviceToken: process.env.SERVICE_JWT_SECRET ?? null,
 };

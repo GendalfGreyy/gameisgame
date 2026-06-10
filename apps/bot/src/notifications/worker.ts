@@ -11,7 +11,8 @@ type NotificationJob = {
     | 'friend_joined_event'
     | 'check_in_confirmed'
     | 'tonight_digest'
-    | 'winback';
+    | 'winback'
+    | 'squad_recap';
   telegramId: string;
   message: string;
 };
