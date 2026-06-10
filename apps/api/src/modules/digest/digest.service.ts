@@ -19,6 +19,8 @@ const NOTIFICATION_QUEUE = 'notifications';
 const TONIGHT_DIGEST_CRON = '0 17 * * *';
 /** Win-back scan runs daily at noon. */
 const WINBACK_CRON = '0 12 * * *';
+/** Squad weekly recap posts to linked group chats on Monday morning. */
+const SQUAD_RECAP_CRON = '0 10 * * 1';
 
 /** Users active within this window receive the digest. */
 const ACTIVE_WINDOW_DAYS = 30;
@@ -29,10 +31,13 @@ const WINBACK_MAX_SILENT_DAYS = 14;
 const WINBACK_COOLDOWN_DAYS = 14;
 const MAX_DIGEST_EVENTS = 3;
 
-type DigestJob = { kind: 'tonight_digest' } | { kind: 'winback' };
+type DigestJob =
+  | { kind: 'tonight_digest' }
+  | { kind: 'winback' }
+  | { kind: 'squad_recap' };
 
 type NotificationJob = {
-  type: 'tonight_digest' | 'winback';
+  type: 'tonight_digest' | 'winback' | 'squad_recap';
   telegramId: string;
   message: string;
 };
@@ -67,14 +72,24 @@ export class DigestService implements OnModuleInit, OnModuleDestroy {
       name: 'winback',
       data: { kind: 'winback' },
     });
+    await this.digestQueue.upsertJobScheduler('squad-recap', { pattern: SQUAD_RECAP_CRON }, {
+      name: 'squad-recap',
+      data: { kind: 'squad_recap' },
+    });
 
     this.worker = new Worker<DigestJob>(
       DIGEST_QUEUE,
       async (job) => {
-        if (job.data.kind === 'tonight_digest') {
-          await this.runTonightDigest();
-        } else {
-          await this.runWinback();
+        switch (job.data.kind) {
+          case 'tonight_digest':
+            await this.runTonightDigest();
+            break;
+          case 'winback':
+            await this.runWinback();
+            break;
+          case 'squad_recap':
+            await this.runSquadRecap();
+            break;
         }
       },
       { connection },
@@ -193,5 +208,73 @@ export class DigestService implements OnModuleInit, OnModuleDestroy {
     }
 
     this.logger.log(`Winback queued for ${queued} users`);
+  }
+
+  /**
+   * Weekly squad recap: previous week's points posted into the linked group
+   * chat. The bot's notification worker delivers to group chat ids the same
+   * way it delivers to user DMs.
+   */
+  async runSquadRecap() {
+    const now = new Date();
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const day = now.getUTCDay();
+    const monday = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (day === 0 ? 6 : day - 1)),
+    );
+    const prevMonday = new Date(monday.getTime() - weekMs);
+
+    const squads = await this.prisma.squad.findMany({
+      where: { tgChatId: { not: null } },
+      include: {
+        members: {
+          include: {
+            user: { select: { id: true, firstName: true } },
+          },
+        },
+      },
+    });
+
+    let queued = 0;
+    for (const squad of squads) {
+      if (!squad.tgChatId) {
+        continue;
+      }
+
+      const memberIds = squad.members.map((m) => m.userId);
+      const ledger = await this.prisma.pointsLedger.groupBy({
+        by: ['userId'],
+        where: {
+          userId: { in: memberIds },
+          createdAt: { gte: prevMonday, lt: monday },
+          amount: { gt: 0 },
+        },
+        _sum: { amount: true },
+      });
+
+      const totals = new Map(ledger.map((row) => [row.userId, row._sum.amount ?? 0]));
+      const weekTotal = [...totals.values()].reduce((sum, value) => sum + value, 0);
+      if (weekTotal === 0) {
+        // Silent week — a "0 points" post only rubs it in. Skip.
+        continue;
+      }
+
+      const top = squad.members
+        .map((m) => ({ name: m.user.firstName, points: totals.get(m.userId) ?? 0 }))
+        .sort((a, b) => b.points - a.points)
+        .slice(0, 3);
+      const lines = top
+        .filter((entry) => entry.points > 0)
+        .map((entry, index) => `${['🥇', '🥈', '🥉'][index]} ${entry.name} — ${entry.points}`);
+
+      await this.notificationQueue.add('squad_recap', {
+        type: 'squad_recap',
+        telegramId: squad.tgChatId.toString(),
+        message: `«${squad.name}» за неделю: ${weekTotal} очков\n${lines.join('\n')}\n\nНовая неделя началась — кто сегодня тащит?`,
+      });
+      queued += 1;
+    }
+
+    this.logger.log(`Squad recap queued for ${queued} chats`);
   }
 }
