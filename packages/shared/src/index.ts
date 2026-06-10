@@ -1,3 +1,14 @@
-// Shared types, DTOs, zod schemas — populated in phase 1+.
-// Intentionally empty stub so workspace resolves @game-is-game/shared.
-export {};
+export * from './constants/check-in.js';
+export * from './constants/fraud.js';
+export * from './constants/geo.js';
+export * from './constants/points.js';
+export * from './constants/streak.js';
+export * from './constants/templates.js';
+export * from './schemas/auth.js';
+export * from './schemas/check-ins.js';
+export * from './schemas/common.js';
+export * from './schemas/events.js';
+export * from './schemas/friends.js';
+export * from './schemas/leaderboard.js';
+export * from './schemas/squads.js';
+export * from './types/enums.js';
