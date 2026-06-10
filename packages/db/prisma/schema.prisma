@@ -1,0 +1,345 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../generated/client"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+enum UserRole {
+  user
+  moderator
+  admin
+}
+
+enum PrivacyMode {
+  precise
+  approximate
+  hidden
+}
+
+enum FriendshipStatus {
+  pending
+  accepted
+  blocked
+}
+
+enum CommunityMemberRole {
+  member
+  admin
+}
+
+enum EventStatus {
+  draft
+  published
+  cancelled
+  completed
+}
+
+enum CheckInStatus {
+  confirmed
+  pending
+  rejected
+}
+
+enum CheckInMethod {
+  gps
+  qr
+  manual
+}
+
+enum BoostStatus {
+  pending
+  active
+  expired
+  cancelled
+}
+
+enum BoostPlan {
+  spotlight_1h
+  spotlight_24h
+  super_boost
+}
+
+enum PointsReason {
+  check_in
+  event_host
+  streak_bonus
+  invite_friend
+  boost_refund
+  admin_adjustment
+}
+
+enum ReportStatus {
+  open
+  reviewed
+  dismissed
+  actioned
+}
+
+enum ReportTargetType {
+  user
+  event
+  check_in
+}
+
+model User {
+  id              String      @id @default(cuid())
+  telegramId      BigInt      @unique @map("telegram_id")
+  username        String?
+  firstName       String      @map("first_name")
+  lastName        String?     @map("last_name")
+  photoUrl        String?     @map("photo_url")
+  role            UserRole    @default(user)
+  privacyMode     PrivacyMode @default(approximate) @map("privacy_mode")
+  totalPoints     Int         @default(0) @map("total_points")
+  streakDays      Int         @default(0) @map("streak_days")
+  lastCheckInDate DateTime?   @map("last_check_in_date") @db.Date
+  streakWeeks     Int         @default(0) @map("streak_weeks")
+  lastActiveWeek  DateTime?   @map("last_active_week") @db.Date
+  freezeTokens    Int         @default(1) @map("freeze_tokens")
+  deletedAt       DateTime?   @map("deleted_at")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  friendshipsRequested Friendship[]       @relation("FriendshipRequester")
+  friendshipsReceived Friendship[]      @relation("FriendshipAddressee")
+  communitiesOwned   Community[]         @relation("CommunityOwner")
+  communityMembers   CommunityMember[]
+  venuesCreated      Venue[]             @relation("VenueCreator")
+  eventsHosted       GameEvent[]         @relation("EventHost")
+  eventParticipants  EventParticipant[]
+  checkIns           CheckIn[]
+  pointsLedger       PointsLedger[]
+  boostsPurchased    Boost[]
+  squadsOwned        Squad[]             @relation("SquadOwner")
+  squadMembership    SquadMember?
+  reportsFiled       Report[]            @relation("ReportReporter")
+  reportsReviewed    Report[]            @relation("ReportReviewer")
+  auditLogs          AdminAuditLog[]
+
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model Friendship {
+  id          String           @id @default(cuid())
+  requesterId String           @map("requester_id")
+  addresseeId String           @map("addressee_id")
+  status      FriendshipStatus @default(pending)
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  requester User @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@map("friendships")
+}
+
+model Community {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  avatarUrl   String?  @map("avatar_url")
+  ownerId     String   @map("owner_id")
+  isPublic    Boolean  @default(true) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  owner   User              @relation("CommunityOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members CommunityMember[]
+  events  GameEvent[]
+
+  @@map("communities")
+}
+
+model CommunityMember {
+  id          String              @id @default(cuid())
+  communityId String              @map("community_id")
+  userId      String              @map("user_id")
+  role        CommunityMemberRole @default(member)
+  joinedAt    DateTime            @default(now()) @map("joined_at")
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([communityId, userId])
+  @@map("community_members")
+}
+
+model Venue {
+  id          String                                @id @default(cuid())
+  name        String
+  address     String?
+  geoPoint    Unsupported("geography(Point,4326)")? @map("geo_point")
+  createdById String                                @map("created_by_id")
+  createdAt   DateTime                              @default(now()) @map("created_at")
+  updatedAt   DateTime                              @updatedAt @map("updated_at")
+
+  createdBy User        @relation("VenueCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  events    GameEvent[]
+
+  @@map("venues")
+}
+
+model GameEvent {
+  id               String                                @id @default(cuid())
+  hostId           String                                @map("host_id")
+  venueId          String?                               @map("venue_id")
+  communityId      String?                               @map("community_id")
+  title            String
+  description      String?
+  geoPoint         Unsupported("geography(Point,4326)")? @map("geo_point")
+  startsAt         DateTime                              @map("starts_at")
+  endsAt           DateTime                              @map("ends_at")
+  status           EventStatus                           @default(draft)
+  maxParticipants  Int?                                  @map("max_participants")
+  hotScore         Float                                 @default(0) @map("hot_score")
+  boostScore       Float                                 @default(0) @map("boost_score")
+  createdAt        DateTime                              @default(now()) @map("created_at")
+  updatedAt        DateTime                              @updatedAt @map("updated_at")
+
+  host         User               @relation("EventHost", fields: [hostId], references: [id], onDelete: Cascade)
+  venue        Venue?             @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  community    Community?         @relation(fields: [communityId], references: [id], onDelete: SetNull)
+  participants EventParticipant[]
+  checkIns     CheckIn[]
+  boosts       Boost[]
+
+  @@index([status, startsAt])
+  @@map("game_events")
+}
+
+model EventParticipant {
+  id       String   @id @default(cuid())
+  eventId  String   @map("event_id")
+  userId   String   @map("user_id")
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  event GameEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@map("event_participants")
+}
+
+model CheckIn {
+  id          String        @id @default(cuid())
+  eventId     String        @map("event_id")
+  userId      String        @map("user_id")
+  lat         Float
+  lng         Float
+  accuracy    Float?
+  method      CheckInMethod @default(gps)
+  fraudScore  Int           @default(0) @map("fraud_score")
+  status      CheckInStatus @default(pending)
+  checkedInAt DateTime      @default(now()) @map("checked_in_at")
+
+  event GameEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, userId])
+  @@index([userId, checkedInAt])
+  @@map("check_ins")
+}
+
+model PointsLedger {
+  id            String       @id @default(cuid())
+  userId        String       @map("user_id")
+  amount        Int
+  reason        PointsReason
+  referenceType String?      @map("reference_type")
+  referenceId   String?      @map("reference_id")
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("points_ledger")
+}
+
+model Boost {
+  id                        String      @id @default(cuid())
+  eventId                   String      @map("event_id")
+  userId                    String      @map("user_id")
+  plan                      BoostPlan
+  status                    BoostStatus @default(pending)
+  starsAmount               Int         @map("stars_amount")
+  telegramPaymentChargeId   String?     @unique @map("telegram_payment_charge_id")
+  activatedAt               DateTime?   @map("activated_at")
+  expiresAt                 DateTime?   @map("expires_at")
+  createdAt                 DateTime    @default(now()) @map("created_at")
+  updatedAt                 DateTime    @updatedAt @map("updated_at")
+
+  event GameEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, status])
+  @@map("boosts")
+}
+
+model Squad {
+  id         String   @id @default(cuid())
+  name       String
+  inviteCode String   @unique @map("invite_code")
+  ownerId    String   @map("owner_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  owner   User          @relation("SquadOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members SquadMember[]
+
+  @@map("squads")
+}
+
+model SquadMember {
+  id       String   @id @default(cuid())
+  squadId  String   @map("squad_id")
+  userId   String   @unique @map("user_id")
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  squad Squad @relation(fields: [squadId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([squadId, userId])
+  @@map("squad_members")
+}
+
+model Report {
+  id           String           @id @default(cuid())
+  reporterId   String           @map("reporter_id")
+  targetType   ReportTargetType @map("target_type")
+  targetId     String           @map("target_id")
+  reason       String
+  status       ReportStatus     @default(open)
+  reviewedById String?          @map("reviewed_by_id")
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  reporter   User  @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("ReportReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([targetType, targetId])
+  @@map("reports")
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  adminId    String   @map("admin_id")
+  action     String
+  targetType String   @map("target_type")
+  targetId   String   @map("target_id")
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId, createdAt])
+  @@map("admin_audit_logs")
+}
