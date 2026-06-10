@@ -17,6 +17,8 @@ export const envSchema = z.object({
   JWT_REFRESH_TTL: z.string().default('30d'),
   JWT_ISSUER: z.string().default('game-is-game'),
   JWT_AUDIENCE: z.string().default('game-is-game-miniapp'),
+  /** Static bearer token for bot → api internal endpoints. Internal routes 503 when unset. */
+  SERVICE_JWT_SECRET: z.string().min(32).optional(),
   ADMIN_BOOTSTRAP_TELEGRAM_IDS: z.string().default(''),
 });
 

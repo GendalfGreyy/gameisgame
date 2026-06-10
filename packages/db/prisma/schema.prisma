@@ -288,6 +288,8 @@ model Squad {
   id         String   @id @default(cuid())
   name       String
   inviteCode String   @unique @map("invite_code")
+  /** Linked Telegram group chat for weekly recaps (set via bot /squad command). */
+  tgChatId   BigInt?  @unique @map("tg_chat_id")
   ownerId    String   @map("owner_id")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")

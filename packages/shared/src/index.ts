@@ -9,6 +9,7 @@ export * from './schemas/check-ins.js';
 export * from './schemas/common.js';
 export * from './schemas/events.js';
 export * from './schemas/friends.js';
+export * from './schemas/internal.js';
 export * from './schemas/leaderboard.js';
 export * from './schemas/squads.js';
 export * from './types/enums.js';

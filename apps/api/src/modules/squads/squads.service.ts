@@ -3,6 +3,8 @@ import { randomBytes } from 'node:crypto';
 import type {
   CreateSquadRequest,
   JoinSquadRequest,
+  LinkSquadChatRequest,
+  LinkSquadChatResponse,
   SquadDetail,
   SquadLeaderboardResponse,
 } from '@game-is-game/shared';
@@ -152,6 +154,34 @@ export class SquadsService {
       : null;
 
     return { items, mySquadRank };
+  }
+
+  /** Bot-only (via internal route): bind a Telegram group chat to a squad. */
+  async linkChat(input: LinkSquadChatRequest): Promise<LinkSquadChatResponse> {
+    const squad = await this.prisma.squad.findUnique({
+      where: { inviteCode: input.inviteCode.toUpperCase() },
+      include: { _count: { select: { members: true } } },
+    });
+    if (!squad) {
+      throw new NotFoundException('Invalid invite code');
+    }
+
+    const chatId = BigInt(input.chatId);
+    const taken = await this.prisma.squad.findUnique({ where: { tgChatId: chatId } });
+    if (taken && taken.id !== squad.id) {
+      throw new ConflictException('This chat is already linked to another squad');
+    }
+
+    await this.prisma.squad.update({
+      where: { id: squad.id },
+      data: { tgChatId: chatId },
+    });
+
+    return {
+      squadId: squad.id,
+      name: squad.name,
+      memberCount: squad._count.members,
+    };
   }
 
   private async getDetail(squadId: string): Promise<SquadDetail> {

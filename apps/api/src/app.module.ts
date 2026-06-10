@@ -12,6 +12,7 @@ import { DigestModule } from './modules/digest/digest.module.js';
 import { EventsModule } from './modules/events/events.module.js';
 import { FriendsModule } from './modules/friends/friends.module.js';
 import { HealthController } from './modules/health/health.controller.js';
+import { InternalModule } from './modules/internal/internal.module.js';
 import { PointsModule } from './modules/points/points.module.js';
 import { SquadsModule } from './modules/squads/squads.module.js';
 import { StreaksModule } from './modules/streaks/streaks.module.js';
@@ -50,6 +51,7 @@ import { RedisModule } from './redis/redis.module.js';
     FriendsModule,
     SquadsModule,
     DigestModule,
+    InternalModule,
   ],
   controllers: [HealthController],
   providers: [
