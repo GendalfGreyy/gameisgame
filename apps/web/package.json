@@ -5,11 +5,29 @@
   "description": "Telegram Mini App frontend — React + Vite + MapLibre.",
   "type": "module",
   "scripts": {
-    "build": "echo 'TODO: vite build (phase 6)' && exit 0",
-    "dev": "echo 'TODO: vite (phase 6)' && exit 0",
+    "build": "tsc -b && vite build",
+    "dev": "vite",
     "test": "echo 'TODO: vitest (phase 6)' && exit 0",
     "lint": "echo 'lint runs from root' && exit 0",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@game-is-game/shared": "workspace:*",
+    "@tanstack/react-query": "^5.64.1",
+    "@twa-dev/sdk": "^8.0.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7"
   }
 }
