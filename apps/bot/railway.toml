@@ -1,0 +1,11 @@
+# Railway service: bot (grammY long-polling + BullMQ worker)
+# In Railway UI: Config file path = apps/bot/railway.toml
+# No public domain required — disable Public Networking for this service.
+
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @game-is-game/bot build"
+
+[deploy]
+startCommand = "pnpm --filter @game-is-game/bot start"
+restartPolicyType = "on_failure"

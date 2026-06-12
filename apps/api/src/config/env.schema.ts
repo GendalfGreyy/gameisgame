@@ -3,6 +3,8 @@ import { z } from 'zod';
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  /** Railway injects PORT; falls back to API_PORT for local/docker. */
+  PORT: z.coerce.number().int().optional(),
   API_PORT: z.coerce.number().int().default(3001),
   API_PUBLIC_URL: z.string().url().default('http://localhost:3001'),
   API_CORS_ORIGINS: z.string().default('http://localhost:5173'),

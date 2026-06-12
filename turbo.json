@@ -6,7 +6,14 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "build/**"],
-      "env": []
+      "env": [
+        "VITE_API_URL",
+        "VITE_MAPLIBRE_STYLE_URL",
+        "VITE_SENTRY_DSN",
+        "VITE_POSTHOG_KEY",
+        "VITE_POSTHOG_HOST",
+        "VITE_BOOSTS_ENABLED"
+      ]
     },
     "dev": {
       "cache": false,

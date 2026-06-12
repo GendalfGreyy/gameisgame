@@ -1,0 +1,13 @@
+# Railway service: web (Mini App static host)
+# In Railway UI: same GitHub repo, Config file path = apps/web/railway.toml
+# Do NOT set Root Directory to apps/web — pnpm workspace needs repo root.
+
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @game-is-game/web build"
+
+[deploy]
+startCommand = "pnpm --filter @game-is-game/web start"
+healthcheckPath = "/"
+healthcheckTimeout = 120
+restartPolicyType = "on_failure"

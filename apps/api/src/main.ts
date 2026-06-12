@@ -12,17 +12,31 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
 
   const configService = app.get(ConfigService<Env, true>);
-  const port = configService.get('API_PORT', { infer: true });
-  const corsOrigins = configService
-    .get('API_CORS_ORIGINS', { infer: true })
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter((origin) => origin.length > 0);
+  const port: number =
+    configService.get('PORT', { infer: true }) ??
+    configService.get('API_PORT', { infer: true }) ??
+    3001;
+  const webappUrl = configService.get('TELEGRAM_WEBAPP_URL', { infer: true });
+  const corsOrigins = [
+    ...new Set(
+      [
+        ...configService
+          .get('API_CORS_ORIGINS', { infer: true })
+          .split(',')
+          .map((origin) => origin.trim())
+          .filter((origin) => origin.length > 0),
+        webappUrl,
+      ].filter((origin) => origin.length > 0),
+    ),
+  ];
   const nodeEnv = configService.get('NODE_ENV', { infer: true });
   const cloudflareDevOrigin = /^https:\/\/[\w-]+\.trycloudflare\.com$/;
 
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       if (!origin) {
         callback(null, true);
         return;
@@ -40,7 +54,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 }
 
 void bootstrap();

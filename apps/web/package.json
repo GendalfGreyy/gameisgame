@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -b && vite build",
+    "start": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
     "dev": "vite",
     "test": "vitest run",
     "lint": "echo 'lint runs from root' && exit 0",
