@@ -4,14 +4,9 @@ export function applyTelegramTheme() {
   const theme = WebApp.themeParams;
   const root = document.documentElement;
 
-  if (theme.bg_color) {
-    root.style.setProperty('--tg-bg', theme.bg_color);
-  }
-  if (theme.text_color) {
-    root.style.setProperty('--tg-text', theme.text_color);
-  }
   if (theme.button_color) {
     root.style.setProperty('--tg-accent', theme.button_color);
+    root.style.setProperty('--gig-accent', theme.button_color);
   }
 
   WebApp.ready();
@@ -20,4 +15,9 @@ export function applyTelegramTheme() {
 
 export function getInitData() {
   return WebApp.initData;
+}
+
+export function getStartParam(): string | undefined {
+  const param = WebApp.initDataUnsafe.start_param;
+  return typeof param === 'string' && param.length > 0 ? param : undefined;
 }
