@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 
+import { NotificationsModule } from '../notifications/notifications.module.js';
 import { PointsModule } from '../points/points.module.js';
 import { StreaksModule } from '../streaks/streaks.module.js';
 import { CheckInsController } from './check-ins.controller.js';
 import { CheckInsService } from './check-ins.service.js';
 
 @Module({
-  imports: [PointsModule, StreaksModule],
+  imports: [PointsModule, StreaksModule, NotificationsModule],
   controllers: [CheckInsController],
   providers: [CheckInsService],
 })

@@ -18,9 +18,25 @@ async function bootstrap() {
     .split(',')
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
+  const nodeEnv = configService.get('NODE_ENV', { infer: true });
+  const cloudflareDevOrigin = /^https:\/\/[\w-]+\.trycloudflare\.com$/;
 
   app.enableCors({
-    origin: corsOrigins,
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (corsOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      if (nodeEnv === 'development' && cloudflareDevOrigin.test(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`CORS blocked origin: ${origin}`));
+    },
     credentials: true,
   });
 

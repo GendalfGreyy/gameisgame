@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { PointsReason, Prisma } from '@game-is-game/db';
+import { POINTS_INVITE_FRIEND } from '@game-is-game/shared';
 
 import { PrismaService } from '../../prisma/prisma.service.js';
 
@@ -33,6 +34,34 @@ export class PointsService {
     });
 
     return entry;
+  }
+
+  /** Idempotent invite reward — one grant per invitee. */
+  async awardInviteFriend(
+    inviterId: string,
+    inviteeId: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<void> {
+    const client = tx ?? this.prisma;
+    const existing = await client.pointsLedger.findFirst({
+      where: {
+        userId: inviterId,
+        reason: 'invite_friend',
+        referenceId: inviteeId,
+      },
+    });
+    if (existing) {
+      return;
+    }
+
+    await this.award({
+      userId: inviterId,
+      amount: POINTS_INVITE_FRIEND,
+      reason: 'invite_friend',
+      referenceType: 'user',
+      referenceId: inviteeId,
+      ...(tx !== undefined ? { tx } : {}),
+    });
   }
 
   async getLeaderboard(userId: string, limit = 20) {

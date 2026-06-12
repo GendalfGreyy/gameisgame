@@ -49,7 +49,5 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # Tests added in phase 2 (auth) — kept as a separate step so the
-      # build job stays useful before the test suite exists.
-      # - name: Test
-      #   run: pnpm test
+      - name: Test
+        run: pnpm test

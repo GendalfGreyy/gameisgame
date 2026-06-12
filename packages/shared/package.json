@@ -11,12 +11,16 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "echo 'TODO: vitest (phase 3)' && exit 0",
+    "test": "vitest run",
     "lint": "echo 'lint runs from root' && exit 0",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
     "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.4"
   }
 }

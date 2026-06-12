@@ -9,6 +9,8 @@ export const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   REDIS_URL: z.string().min(1),
   TELEGRAM_BOT_TOKEN: z.string().min(1),
+  TELEGRAM_BOT_USERNAME: z.string().min(3).default('gamegamebot'),
+  TELEGRAM_WEBAPP_URL: z.string().url().default('http://localhost:5173'),
   JWT_SECRET: z.string().min(32),
   /** Dedicated secret for rotating check-in QR tokens. Falls back to JWT_SECRET when unset. */
   CHECKIN_QR_SECRET: z.string().min(32).optional(),
@@ -20,6 +22,14 @@ export const envSchema = z.object({
   /** Static bearer token for bot → api internal endpoints. Internal routes 503 when unset. */
   SERVICE_JWT_SECRET: z.string().min(32).optional(),
   ADMIN_BOOTSTRAP_TELEGRAM_IDS: z.string().default(''),
+  FEATURE_BOOSTS_ENABLED: z
+    .string()
+    .default('false')
+    .transform((value) => value === 'true'),
+  FEATURE_PAYMENTS_ENABLED: z
+    .string()
+    .default('false')
+    .transform((value) => value === 'true'),
 });
 
 export type Env = z.infer<typeof envSchema>;

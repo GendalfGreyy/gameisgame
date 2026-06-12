@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-export const latSchema = z.number().min(-90).max(90);
-export const lngSchema = z.number().min(-180).max(180);
+/** coerce: query strings from GET ?lat=&lng= arrive as strings */
+export const latSchema = z.coerce.number().min(-90).max(90);
+export const lngSchema = z.coerce.number().min(-180).max(180);
 
 export const geoPointSchema = z.object({
   lat: latSchema,

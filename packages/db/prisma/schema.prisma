@@ -121,8 +121,12 @@ model User {
   reportsFiled       Report[]            @relation("ReportReporter")
   reportsReviewed    Report[]            @relation("ReportReviewer")
   auditLogs          AdminAuditLog[]
+  referredBy         User?               @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals          User[]              @relation("UserReferrals")
+  referredById       String?             @map("referred_by_id")
 
   @@index([deletedAt])
+  @@index([referredById])
   @@map("users")
 }
 

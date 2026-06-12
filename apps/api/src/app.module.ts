@@ -16,6 +16,11 @@ import { InternalModule } from './modules/internal/internal.module.js';
 import { PointsModule } from './modules/points/points.module.js';
 import { SquadsModule } from './modules/squads/squads.module.js';
 import { StreaksModule } from './modules/streaks/streaks.module.js';
+import { UsersModule } from './modules/users/users.module.js';
+import { ModerationModule } from './modules/moderation/moderation.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
+import { PaymentsModule } from './modules/payments/payments.module.js';
+import { PrivacyModule } from './modules/privacy/privacy.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { RedisModule } from './redis/redis.module.js';
 
@@ -52,6 +57,11 @@ import { RedisModule } from './redis/redis.module.js';
     SquadsModule,
     DigestModule,
     InternalModule,
+    UsersModule,
+    NotificationsModule,
+    PaymentsModule,
+    PrivacyModule,
+    ModerationModule,
   ],
   controllers: [HealthController],
   providers: [

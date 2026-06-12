@@ -43,4 +43,9 @@ export class AuthController {
     });
     return this.authService.toUserProfile(record);
   }
+
+  @Get('invite-link')
+  inviteLink(@CurrentUser() user: RequestUser) {
+    return this.authService.getInviteLink(user.id);
+  }
 }

@@ -1,14 +1,16 @@
 import { randomBytes } from 'node:crypto';
 
-import type { TelegramAuthResponse, UserProfile } from '@game-is-game/shared';
+import type { InviteLinkResponse, TelegramAuthResponse, UserProfile } from '@game-is-game/shared';
+import {
+  buildBotReferralLink,
+  buildMiniAppDeepLink,
+  encodeReferralStartParam,
+  parseReferralStartParam,
+} from '@game-is-game/shared';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { User } from '@game-is-game/db';
-
-import type { Env } from '../../config/env.schema.js';
-import { PrismaService } from '../../prisma/prisma.service.js';
-import { RedisService } from '../../redis/redis.service.js';
 import {
   isAuthDateInvalidError,
   isExpiredError,
@@ -16,6 +18,10 @@ import {
   isSignatureMissingError,
 } from '@telegram-apps/init-data-node';
 
+import type { Env } from '../../config/env.schema.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { RedisService } from '../../redis/redis.service.js';
+import { PointsService } from '../points/points.service.js';
 import { validateTelegramInitData } from './telegram-init-data.js';
 
 function describeInitDataError(error: unknown): string {
@@ -38,6 +44,7 @@ export class AuthService {
     @Inject(RedisService) private readonly redis: RedisService,
     @Inject(JwtService) private readonly jwtService: JwtService,
     @Inject(ConfigService) private readonly configService: ConfigService<Env, true>,
+    @Inject(PointsService) private readonly pointsService: PointsService,
   ) {}
 
   async authenticateWithTelegram(initData: string): Promise<TelegramAuthResponse> {
@@ -62,36 +69,59 @@ export class AuthService {
     const bootstrapIds = this.configService
       .get('ADMIN_BOOTSTRAP_TELEGRAM_IDS', { infer: true })
       .split(',')
-      .map((value) => value.trim())
-      .filter((value) => value.length > 0);
+      .map((value: string) => value.trim())
+      .filter((value: string) => value.length > 0);
 
     const isBootstrapAdmin = bootstrapIds.includes(String(parsed.user.id));
+    const telegramId = BigInt(parsed.user.id);
 
-    const user = await this.prisma.user.upsert({
-      where: { telegramId: BigInt(parsed.user.id) },
-      create: {
-        telegramId: BigInt(parsed.user.id),
-        username: parsed.user.username ?? null,
-        firstName: parsed.user.first_name,
-        lastName: parsed.user.last_name ?? null,
-        photoUrl: parsed.user.photo_url ?? null,
-        role: isBootstrapAdmin ? 'admin' : 'user',
-      },
-      update: {
-        username: parsed.user.username ?? null,
-        firstName: parsed.user.first_name,
-        lastName: parsed.user.last_name ?? null,
-        photoUrl: parsed.user.photo_url ?? null,
-        deletedAt: null,
-        ...(isBootstrapAdmin ? { role: 'admin' as const } : {}),
-      },
-    });
+    const existing = await this.prisma.user.findUnique({ where: { telegramId } });
+    const referrerId =
+      existing === null ? await this.resolveReferrerId(parsed.startParam) : null;
+
+    const user = existing
+      ? await this.prisma.user.update({
+          where: { telegramId },
+          data: {
+            username: parsed.user.username ?? null,
+            firstName: parsed.user.first_name,
+            lastName: parsed.user.last_name ?? null,
+            photoUrl: parsed.user.photo_url ?? null,
+            deletedAt: null,
+            ...(isBootstrapAdmin ? { role: 'admin' as const } : {}),
+          },
+        })
+      : await this.prisma.user.create({
+          data: {
+            telegramId,
+            username: parsed.user.username ?? null,
+            firstName: parsed.user.first_name,
+            lastName: parsed.user.last_name ?? null,
+            photoUrl: parsed.user.photo_url ?? null,
+            role: isBootstrapAdmin ? 'admin' : 'user',
+            referredById: referrerId,
+          },
+        });
 
     if (user.deletedAt) {
       throw new UnauthorizedException('Account is deactivated');
     }
 
+    if (existing === null && referrerId) {
+      await this.pointsService.awardInviteFriend(referrerId, user.id);
+    }
+
     return this.issueTokens(user);
+  }
+
+  getInviteLink(userId: string): InviteLinkResponse {
+    const botUsername = this.configService.get('TELEGRAM_BOT_USERNAME', { infer: true });
+    const startParam = encodeReferralStartParam(userId);
+    return {
+      startParam,
+      miniAppUrl: buildMiniAppDeepLink(botUsername, startParam),
+      botUrl: buildBotReferralLink(botUsername, userId),
+    };
   }
 
   async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; expiresIn: number }> {
@@ -117,6 +147,19 @@ export class AuthService {
 
     const accessToken = this.createAccessToken(user);
     return { accessToken, expiresIn: ACCESS_TOKEN_TTL_SECONDS };
+  }
+
+  private async resolveReferrerId(startParam: string | undefined): Promise<string | null> {
+    const referrerId = parseReferralStartParam(startParam);
+    if (!referrerId) {
+      return null;
+    }
+
+    const referrer = await this.prisma.user.findFirst({
+      where: { id: referrerId, deletedAt: null },
+      select: { id: true },
+    });
+    return referrer?.id ?? null;
   }
 
   private async issueTokens(user: User): Promise<TelegramAuthResponse> {

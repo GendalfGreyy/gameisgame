@@ -1,5 +1,8 @@
 import type { Bot } from 'grammy';
 
+import { botConfig } from '../config.js';
+import { parseStartPayload } from '../deeplinks/parse.js';
+
 function isHttpsUrl(url: string): boolean {
   try {
     return new URL(url).protocol === 'https:';
@@ -10,19 +13,33 @@ function isHttpsUrl(url: string): boolean {
 
 export function registerStartCommand(bot: Bot) {
   bot.command('start', async (context) => {
-    const webappUrl = process.env.TELEGRAM_WEBAPP_URL ?? 'http://localhost:5173';
+    const payload = context.match?.trim();
+    const intent = parseStartPayload(payload || undefined);
+    const webappUrl = botConfig.webappUrl;
+
+    const openAppText =
+      intent.kind === 'event'
+        ? 'Открываю событие в Mini App…'
+        : intent.kind === 'referral'
+          ? 'Тебя пригласили в Game is Game — заходи!'
+          : 'Open Game is Game to find nearby events and earn points.';
 
     if (isHttpsUrl(webappUrl)) {
-      await context.reply('Open Game is Game to find nearby events and earn points.', {
+      const url =
+        intent.kind === 'event'
+          ? `${webappUrl}?tgWebAppStartParam=${encodeURIComponent(`evt_${intent.eventId}`)}`
+          : webappUrl;
+
+      await context.reply(openAppText, {
         reply_markup: {
-          inline_keyboard: [[{ text: 'Open Mini App', web_app: { url: webappUrl } }]],
+          inline_keyboard: [[{ text: 'Open Mini App', web_app: { url } }]],
         },
       });
       return;
     }
 
     await context.reply(
-      'Game is Game — nearby events, check-ins, points.\n\n' +
+      `${openAppText}\n\n` +
         'Mini App locally: run an HTTPS tunnel (ngrok / cloudflared) to port 5173, ' +
         'set TELEGRAM_WEBAPP_URL in .env, then restart the bot.',
     );

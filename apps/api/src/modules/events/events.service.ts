@@ -7,7 +7,7 @@ import type {
   StartingSoonRequest,
   UpdateEventRequest,
 } from '@game-is-game/shared';
-import { EVENT_TEMPLATES } from '@game-is-game/shared';
+import { EVENT_TEMPLATES, POINTS_EVENT_HOST } from '@game-is-game/shared';
 import {
   BadRequestException,
   ForbiddenException,
@@ -18,6 +18,8 @@ import {
 import type { EventStatus, GameEvent, User } from '@game-is-game/db';
 
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
+import { PointsService } from '../points/points.service.js';
 
 type NearbyRow = {
   id: string;
@@ -43,7 +45,11 @@ const FALLBACK_LIMIT = 10;
 
 @Injectable()
 export class EventsService {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(PointsService) private readonly pointsService: PointsService,
+    @Inject(NotificationsService) private readonly notifications: NotificationsService,
+  ) {}
 
   getTemplates() {
     return { items: EVENT_TEMPLATES };
@@ -71,6 +77,15 @@ export class EventsService {
     });
 
     await this.setGeoPoint(event.id, input.lat, input.lng);
+
+    await this.pointsService.award({
+      userId: hostId,
+      amount: POINTS_EVENT_HOST,
+      reason: 'event_host',
+      referenceType: 'event',
+      referenceId: event.id,
+    });
+
     return this.toEventDetail(event, input.lat, input.lng, false);
   }
 
@@ -351,6 +366,8 @@ export class EventsService {
       create: { eventId, userId },
       update: {},
     });
+
+    void this.notifications.notifyFriendsOfJoin(eventId, userId);
 
     return {
       eventId: participant.eventId,

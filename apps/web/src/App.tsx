@@ -1,74 +1,153 @@
-import { useState } from 'react';
+import { parseEventStartParam } from '@game-is-game/shared';
+import { useEffect, useState } from 'react';
 
-import { useTelegramAuth } from './features/auth/hooks.js';
+import { useAutoTelegramAuth, useSessionBootstrap, useTelegramAuth } from './features/auth/hooks.js';
 import { useAuthStore } from './features/auth/store.js';
+import { CreateEventScreen } from './features/events/CreateEventScreen.js';
 import { DiscoveryScreen } from './features/events/DiscoveryScreen.js';
 import { EventScreen } from './features/events/EventScreen.js';
+import { FriendsScreen } from './features/friends/FriendsScreen.js';
+import { ProfileScreen } from './features/profile/ProfileScreen.js';
+import { SettingsScreen } from './features/profile/SettingsScreen.js';
 import { HostQrScreen } from './features/host/HostQrScreen.js';
+import { AdminScreen } from './features/moderation/AdminScreen.js';
+import { isOnboardingComplete, OnboardingSheet } from './features/onboarding/OnboardingSheet.js';
+import { LeaderboardScreen } from './features/social/LeaderboardScreen.js';
+import { SquadScreen } from './features/social/SquadScreen.js';
+import { getStartParam } from './shared/lib/telegram.js';
+import { BottomNav, type MainTab } from './shared/ui/BottomNav.js';
+import { ErrorBanner, PrimaryButton } from './shared/ui/primitives.js';
 
-type Screen =
-  | { name: 'discover' }
+type StackScreen =
   | { name: 'event'; eventId: string }
-  | { name: 'host-qr'; eventId: string };
+  | { name: 'host-qr'; eventId: string }
+  | { name: 'friends' }
+  | { name: 'settings' }
+  | { name: 'admin' };
 
 export function App() {
   const user = useAuthStore((state) => state.user);
   const auth = useTelegramAuth();
-  const [screen, setScreen] = useState<Screen>({ name: 'discover' });
+  useSessionBootstrap();
+  useAutoTelegramAuth();
+
+  const [tab, setTab] = useState<MainTab>('discover');
+  const [stack, setStack] = useState<StackScreen | null>(null);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
+
+  useEffect(() => {
+    if (user && isOnboardingComplete()) {
+      setOnboardingDismissed(true);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+    const eventId = parseEventStartParam(getStartParam());
+    if (eventId) {
+      setStack({ name: 'event', eventId });
+    }
+  }, [user]);
+
+  const showOnboarding = user !== null && !isOnboardingComplete() && !onboardingDismissed;
+
+  const openEvent = (eventId: string) => {
+    setStack({ name: 'event', eventId });
+  };
+
+  const showNav = user !== null && stack === null;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 p-6">
-      <header className="space-y-1">
-        <p className="text-sm uppercase tracking-[0.2em] text-tg-accent">Game is Game</p>
-        {user && screen.name === 'discover' ? (
-          <p className="text-sm text-white/60">
-            {user.firstName} · {user.totalPoints} очков
-          </p>
-        ) : null}
-      </header>
+    <div className="mx-auto flex min-h-screen max-w-md flex-col bg-tg-bg">
+      {showOnboarding ? (
+        <OnboardingSheet onDone={() => setOnboardingDismissed(true)} />
+      ) : null}
 
-      {!user ? (
-        <>
-          <section className="space-y-2">
-            <h1 className="text-3xl font-semibold">Где сейчас гейм?</h1>
-            <p className="text-sm text-white/70">
-              События рядом, друзья на месте, очки за реальные чек-ины.
-            </p>
+      <main className="flex flex-1 flex-col gap-5 px-5 pb-24 pt-5">
+        {!user ? (
+          <section className="flex flex-1 flex-col justify-center gap-6 py-8">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gig-accent">
+                Game is Game
+              </p>
+              <h1 className="text-[34px] font-bold leading-tight tracking-tight text-gig-ink">
+                Где сейчас гейм?
+              </h1>
+              <p className="text-[15px] leading-relaxed text-gig-muted">
+                События рядом, друзья на месте, очки за реальные чек-ины.
+              </p>
+            </div>
+            <PrimaryButton
+              className="w-full"
+              onClick={() => {
+                auth.mutate(undefined, {
+                  onSuccess: () => {
+                    if (!isOnboardingComplete()) {
+                      setOnboardingDismissed(false);
+                    }
+                  },
+                });
+              }}
+              disabled={auth.isPending}
+            >
+              {auth.isPending ? 'Подключаюсь…' : 'Войти через Telegram'}
+            </PrimaryButton>
+            {auth.error ? <ErrorBanner message={auth.error.message} /> : null}
           </section>
-          <button
-            type="button"
-            onClick={() => auth.mutate()}
-            disabled={auth.isPending}
-            className="rounded-2xl bg-tg-accent px-4 py-3 text-base font-medium text-white disabled:opacity-60"
-          >
-            {auth.isPending ? 'Подключаюсь…' : 'Войти через Telegram'}
-          </button>
-          {auth.error ? (
-            <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
-              {auth.error.message}
-            </p>
-          ) : null}
-        </>
-      ) : null}
+        ) : null}
 
-      {user && screen.name === 'discover' ? (
-        <DiscoveryScreen onOpenEvent={(eventId) => setScreen({ name: 'event', eventId })} />
-      ) : null}
+        {user && stack === null && tab === 'discover' ? (
+          <DiscoveryScreen user={user} onOpenEvent={openEvent} />
+        ) : null}
 
-      {user && screen.name === 'event' ? (
-        <EventScreen
-          eventId={screen.eventId}
-          onBack={() => setScreen({ name: 'discover' })}
-          onOpenHostQr={(eventId) => setScreen({ name: 'host-qr', eventId })}
-        />
-      ) : null}
+        {user && stack === null && tab === 'create' ? (
+          <CreateEventScreen onCreated={openEvent} />
+        ) : null}
 
-      {user && screen.name === 'host-qr' ? (
-        <HostQrScreen
-          eventId={screen.eventId}
-          onBack={() => setScreen({ name: 'event', eventId: screen.eventId })}
-        />
-      ) : null}
-    </main>
+        {user && stack === null && tab === 'leaderboard' ? <LeaderboardScreen /> : null}
+
+        {user && stack === null && tab === 'squad' ? <SquadScreen /> : null}
+
+        {user && stack === null && tab === 'profile' ? (
+          <ProfileScreen
+            onOpenFriends={() => setStack({ name: 'friends' })}
+            onOpenSettings={() => setStack({ name: 'settings' })}
+            onOpenAdmin={() => setStack({ name: 'admin' })}
+          />
+        ) : null}
+
+        {user && stack?.name === 'friends' ? (
+          <FriendsScreen onBack={() => setStack(null)} />
+        ) : null}
+
+        {user && stack?.name === 'settings' ? (
+          <SettingsScreen onBack={() => setStack(null)} />
+        ) : null}
+
+        {user && stack?.name === 'admin' ? (
+          <AdminScreen onBack={() => setStack(null)} />
+        ) : null}
+
+        {user && stack?.name === 'event' ? (
+          <EventScreen
+            eventId={stack.eventId}
+            onBack={() => setStack(null)}
+            onOpenHostQr={(eventId) => setStack({ name: 'host-qr', eventId })}
+            onCloned={(eventId) => setStack({ name: 'event', eventId })}
+          />
+        ) : null}
+
+        {user && stack?.name === 'host-qr' ? (
+          <HostQrScreen
+            eventId={stack.eventId}
+            onBack={() => setStack({ name: 'event', eventId: stack.eventId })}
+          />
+        ) : null}
+      </main>
+
+      {showNav ? <BottomNav active={tab} onChange={setTab} /> : null}
+    </div>
   );
 }

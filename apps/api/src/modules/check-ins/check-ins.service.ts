@@ -25,6 +25,7 @@ import type { CheckInStatus } from '@game-is-game/db';
 import type { Env } from '../../config/env.schema.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { RedisService } from '../../redis/redis.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 import { PointsService } from '../points/points.service.js';
 import { StreaksService } from '../streaks/streaks.service.js';
 import { makeQrToken, secondsUntilRotation, verifyQrToken, windowIndex } from './qr-token.js';
@@ -50,6 +51,7 @@ export class CheckInsService {
     @Inject(PointsService) private readonly pointsService: PointsService,
     @Inject(StreaksService) private readonly streaksService: StreaksService,
     @Inject(ConfigService) private readonly configService: ConfigService<Env, true>,
+    @Inject(NotificationsService) private readonly notifications: NotificationsService,
   ) {}
 
   /**
@@ -217,6 +219,10 @@ export class CheckInsService {
       dwellConfirmAfter = new Date(now.getTime() + DWELL_MINUTES * 60 * 1000).toISOString();
     }
 
+    if (status === 'confirmed') {
+      void this.notifyCheckInConfirmed(userId, eventId, POINTS_CHECK_IN);
+    }
+
     return {
       id: checkIn.id,
       eventId: checkIn.eventId,
@@ -281,6 +287,8 @@ export class CheckInsService {
 
     await this.redis.client.del(key);
 
+    void this.notifyCheckInConfirmed(userId, eventId, POINTS_CHECK_IN);
+
     return {
       id: updated.id,
       eventId: updated.eventId,
@@ -290,6 +298,32 @@ export class CheckInsService {
       checkedInAt: updated.checkedInAt.toISOString(),
       dwellConfirmAfter: null,
     };
+  }
+
+  private async notifyCheckInConfirmed(
+    userId: string,
+    eventId: string,
+    points: number,
+  ): Promise<void> {
+    const [user, event] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { telegramId: true },
+      }),
+      this.prisma.gameEvent.findUnique({
+        where: { id: eventId },
+        select: { title: true },
+      }),
+    ]);
+    if (!user || !event) {
+      return;
+    }
+    await this.notifications.notifyCheckInConfirmed({
+      telegramId: user.telegramId.toString(),
+      eventTitle: event.title,
+      points,
+      eventId,
+    });
   }
 
   private async distanceToEvent(eventId: string, lat: number, lng: number): Promise<number> {

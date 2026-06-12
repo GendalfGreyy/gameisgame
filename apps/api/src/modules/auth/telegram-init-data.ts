@@ -13,6 +13,7 @@ export type TelegramWebAppUser = {
 export type ParsedInitData = {
   authDate: number;
   user: TelegramWebAppUser;
+  startParam?: string;
 };
 
 export function validateTelegramInitData(initData: string, botToken: string): ParsedInitData {
@@ -26,6 +27,7 @@ export function validateTelegramInitData(initData: string, botToken: string): Pa
 
   return {
     authDate: Math.floor(new Date(parsed.auth_date).getTime() / 1000),
+    ...(parsed.start_param !== undefined ? { startParam: parsed.start_param } : {}),
     user: {
       id: user.id,
       first_name: user.first_name,

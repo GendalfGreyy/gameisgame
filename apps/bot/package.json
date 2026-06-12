@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.build.json",
     "dev": "env -u TELEGRAM_BOT_TOKEN node --env-file=../../.env ./node_modules/tsx/dist/cli.mjs watch src/main.ts",
     "start": "node dist/main.js",
-    "test": "echo 'TODO: vitest (phase 7)' && exit 0",
+    "test": "vitest run",
     "lint": "echo 'lint runs from root' && exit 0",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
@@ -20,6 +20,7 @@
     "ioredis": "^5.4.2"
   },
   "devDependencies": {
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "vitest": "^3.0.4"
   }
 }

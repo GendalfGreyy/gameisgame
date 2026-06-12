@@ -5,9 +5,11 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 
+import type { Env } from '../../config/env.schema.js';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator.js';
 import type { RequestUser } from '../types/request-user.js';
 
@@ -22,6 +24,7 @@ export class JwtAuthGuard implements CanActivate {
   constructor(
     @Inject(Reflector) private readonly reflector: Reflector,
     @Inject(JwtService) private readonly jwtService: JwtService,
+    @Inject(ConfigService) private readonly configService: ConfigService<Env, true>,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -45,7 +48,11 @@ export class JwtAuthGuard implements CanActivate {
 
     const token = authorization.slice('Bearer '.length);
     try {
-      const payload = this.jwtService.verify<AccessTokenPayload>(token);
+      const payload = this.jwtService.verify<AccessTokenPayload>(token, {
+        secret: this.configService.get('JWT_SECRET', { infer: true }),
+        issuer: this.configService.get('JWT_ISSUER', { infer: true }),
+        audience: this.configService.get('JWT_AUDIENCE', { infer: true }),
+      });
       request.user = {
         id: payload.sub,
         telegramId: payload.telegramId,
