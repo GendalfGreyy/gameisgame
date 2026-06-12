@@ -10,6 +10,8 @@ type AuthState = {
     refreshToken: string;
     user: UserProfile;
   }) => void;
+  setUser: (user: UserProfile) => void;
+  updateAccessToken: (accessToken: string) => void;
   clearSession: () => void;
 };
 
@@ -24,6 +26,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
     set({ accessToken, refreshToken, user });
+  },
+  setUser: (user) => {
+    set({ user });
+  },
+  updateAccessToken: (accessToken) => {
+    sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    set({ accessToken });
   },
   clearSession: () => {
     sessionStorage.removeItem(ACCESS_TOKEN_KEY);

@@ -1,25 +1,28 @@
 import type {
   CheckInResponse,
+  CloneEventRequest,
   ConfirmDwellRequest,
   CreateCheckInRequest,
+  CreateEventRequest,
   EventDetail,
+  EventTemplate,
   NearbyEventsResponse,
   QrTokenResponse,
   StartingSoonResponse,
 } from '@game-is-game/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { create } from 'zustand';
 
 import { apiRequest } from '../../shared/api/client.js';
 import { useAuthStore } from '../auth/store.js';
 
-export type GeoPosition = { lat: number; lng: number };
+export type { GeoPosition } from '../privacy/geolocation.js';
+export { useGeolocation } from '../privacy/geolocation.js';
 
 function useToken() {
   return useAuthStore((state) => state.accessToken);
 }
 
-export function useNearbyEvents(position: GeoPosition | null) {
+export function useNearbyEvents(position: { lat: number; lng: number } | null) {
   const token = useToken();
   return useQuery({
     queryKey: ['events', 'nearby', position?.lat, position?.lng],
@@ -33,7 +36,7 @@ export function useNearbyEvents(position: GeoPosition | null) {
   });
 }
 
-export function useStartingSoon(position: GeoPosition | null) {
+export function useStartingSoon(position: { lat: number; lng: number } | null) {
   const token = useToken();
   return useQuery({
     queryKey: ['events', 'starting-soon', position?.lat, position?.lng],
@@ -71,6 +74,22 @@ export function useJoinEvent(eventId: string) {
   });
 }
 
+export function useCloneEvent(eventId: string) {
+  const token = useToken();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: CloneEventRequest) =>
+      apiRequest<EventDetail>(`/events/${eventId}/clone`, {
+        method: 'POST',
+        body,
+        token,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['events'] });
+    },
+  });
+}
+
 export function useCheckIn(eventId: string) {
   const token = useToken();
   const queryClient = useQueryClient();
@@ -103,7 +122,6 @@ export function useConfirmDwell(eventId: string) {
   });
 }
 
-/** Rotating host QR token: refetches exactly when the current token expires. */
 export function useHostQrToken(eventId: string, enabled: boolean) {
   const token = useToken();
   return useQuery({
@@ -118,45 +136,28 @@ export function useHostQrToken(eventId: string, enabled: boolean) {
   });
 }
 
-export function useGeolocation(): {
-  position: GeoPosition | null;
-  error: string | null;
-  refresh: () => void;
-} {
-  return geoStore();
+export function useEventTemplates() {
+  const token = useToken();
+  return useQuery({
+    queryKey: ['events', 'templates'],
+    enabled: Boolean(token),
+    queryFn: () =>
+      apiRequest<{ items: EventTemplate[] }>('/events/templates', { token }),
+  });
 }
 
-type GeoState = {
-  position: GeoPosition | null;
-  error: string | null;
-  refresh: () => void;
-};
-
-const geoStore = create<GeoState>((set) => {
-  const request = () => {
-    if (!('geolocation' in navigator)) {
-      set({ error: 'Геолокация недоступна на этом устройстве' });
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (result) => {
-        set({
-          position: { lat: result.coords.latitude, lng: result.coords.longitude },
-          error: null,
-        });
-      },
-      () => {
-        set({ error: 'Не получилось определить локацию — разреши доступ и обнови' });
-      },
-      { enableHighAccuracy: true, timeout: 10_000 },
-    );
-  };
-
-  request();
-
-  return {
-    position: null,
-    error: null,
-    refresh: request,
-  };
-});
+export function useCreateEvent() {
+  const token = useToken();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: CreateEventRequest) =>
+      apiRequest<EventDetail>('/events', {
+        method: 'POST',
+        body,
+        token,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['events'] });
+    },
+  });
+}
