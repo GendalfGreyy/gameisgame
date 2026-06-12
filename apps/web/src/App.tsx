@@ -60,7 +60,7 @@ export function App() {
   const showNav = user !== null && stack === null;
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col bg-tg-bg">
+    <div className="app-radar-bg mx-auto flex min-h-screen max-w-md flex-col bg-tg-bg">
       {showOnboarding ? (
         <OnboardingSheet onDone={() => setOnboardingDismissed(true)} />
       ) : null}

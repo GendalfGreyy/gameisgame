@@ -38,11 +38,11 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
       <PageTitle title="Настройки" subtitle="Приватность, тема и видимость." />
 
       <div className="space-y-3">
-        <p className="text-sm font-semibold text-gig-ink">Оформление</p>
-        <Card className="flex items-center justify-between gap-4 p-4">
+        <p className="settings-section-label">Оформление</p>
+        <Card className="flex items-center justify-between gap-4 p-5">
           <div>
-            <p className="font-semibold text-gig-ink">Тёмная тема</p>
-            <p className="mt-1 text-sm text-gig-muted">Комфортнее вечером и ночью</p>
+            <p className="text-[17px] font-bold text-gig-ink">Тёмная тема</p>
+            <p className="mt-0.5 text-[15px] text-gig-muted">Комфортнее вечером и ночью</p>
           </div>
           <ThemeSwitch
             checked={theme === 'dark'}
@@ -53,7 +53,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
       </div>
 
       <div className="space-y-3">
-        <p className="text-sm font-semibold text-gig-ink">Режим локации</p>
+        <p className="settings-section-label">Режим локации</p>
         {PRIVACY_MODES.map((mode) => {
           const active = user.privacyMode === mode;
           const label = LABELS[mode];
@@ -66,14 +66,26 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
               className="w-full text-left"
             >
               <Card
-                className={
-                  active
-                    ? 'border-gig-accent/30 bg-gradient-to-br from-[var(--gig-card)] to-gig-accent/10 ring-2 ring-gig-accent/20'
-                    : ''
-                }
+                className={`flex items-center justify-between gap-3 p-5 transition ${
+                  active ? 'border-[rgba(139,92,246,0.45)] ring-1 ring-[rgba(139,92,246,0.3)]' : ''
+                }`}
               >
-                <p className="font-semibold text-gig-ink">{label.title}</p>
-                <p className="mt-1 text-sm leading-relaxed text-gig-muted">{label.hint}</p>
+                <div>
+                  <p className="text-[17px] font-bold text-gig-ink">{label.title}</p>
+                  <p className="mt-0.5 text-[15px] leading-relaxed text-gig-muted">{label.hint}</p>
+                </div>
+                <span
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition ${
+                    active
+                      ? 'gig-gradient-bg border-transparent text-white'
+                      : 'border-[var(--gig-input-border)] text-transparent'
+                  }`}
+                  aria-hidden
+                >
+                  <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.4}>
+                    <path d="m3 8.5 3.2 3L13 4.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
               </Card>
             </button>
           );

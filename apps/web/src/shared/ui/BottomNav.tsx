@@ -71,7 +71,7 @@ export function BottomNav({
                 onClick={() => select(tab.id)}
                 className={
                   isActive
-                    ? 'glass-toolbar-tab-active flex h-9 w-[68%] items-center justify-center rounded-[14px] transition duration-200'
+                    ? 'nav-glow-node flex h-9 w-[68%] items-center justify-center rounded-[14px] transition duration-200'
                     : 'flex h-9 w-[68%] items-center justify-center rounded-[14px] transition duration-200 active:scale-95'
                 }
                 style={{ color: isActive ? 'var(--gig-tab-active-fg)' : 'var(--gig-tab-inactive)' }}

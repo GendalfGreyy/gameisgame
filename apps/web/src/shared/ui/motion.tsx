@@ -88,9 +88,9 @@ export function ProgressRing({
         />
         <defs>
           <linearGradient id="gig-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#6d5efc" />
-            <stop offset="55%" stopColor="#a855f7" />
-            <stop offset="100%" stopColor="#f43f5e" />
+            <stop offset="0%" stopColor="#8b5cf6" />
+            <stop offset="50%" stopColor="#c026d3" />
+            <stop offset="100%" stopColor="#ff3d9a" />
           </linearGradient>
         </defs>
         <circle
@@ -111,7 +111,7 @@ export function ProgressRing({
   );
 }
 
-const CONFETTI_COLORS = ['#6d5efc', '#a855f7', '#f43f5e', '#f59e0b', '#34d399', '#38bdf8'];
+const CONFETTI_COLORS = ['#8b5cf6', '#c026d3', '#ff3d9a', '#f59e0b', '#34d399', '#38bdf8'];
 const CONFETTI_COUNT = 26;
 
 /** One-shot confetti burst from the center of its container. */
