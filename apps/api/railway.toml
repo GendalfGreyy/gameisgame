@@ -3,7 +3,7 @@
 
 [build]
 builder = "nixpacks"
-buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @game-is-game/db exec prisma generate && pnpm --filter @game-is-game/api build"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @game-is-game/db exec prisma generate && pnpm --filter @game-is-game/shared build && pnpm --filter @game-is-game/api build"
 
 [deploy]
 preDeployCommand = "pnpm --filter @game-is-game/db exec prisma migrate deploy"

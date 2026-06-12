@@ -4,7 +4,7 @@
 
 [build]
 builder = "nixpacks"
-buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @game-is-game/bot build"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @game-is-game/shared build && pnpm --filter @game-is-game/bot build"
 
 [deploy]
 startCommand = "pnpm --filter @game-is-game/bot start"

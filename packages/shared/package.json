@@ -14,7 +14,7 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "rm -f tsconfig.tsbuildinfo && tsc -p tsconfig.json",
     "test": "vitest run",
     "lint": "echo 'lint runs from root' && exit 0",
     "typecheck": "tsc --noEmit",
