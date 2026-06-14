@@ -11,7 +11,11 @@ pnpm dev                      # api + web + bot
 
 Tunnel HTTPS for Telegram Mini App (cloudflared / ngrok) → set `TELEGRAM_WEBAPP_URL`, `VITE_API_URL`.
 
-## Deploy (API)
+## Deploy (production)
+
+See **[DEPLOY_RAILWAY.md](./DEPLOY_RAILWAY.md)** for full Railway setup (api + web + bot + Redis + Supabase).
+
+## Deploy (API, Docker)
 
 ```bash
 docker build -f apps/api/Dockerfile -t game-is-game-api .
@@ -38,11 +42,11 @@ Long-polling locally (`pnpm --filter @game-is-game/bot dev`). Production: webhoo
 
 ## Incidents
 
-| Symptom | Check |
-|---------|-------|
-| `Invalid Telegram initData` | Bot token mismatch between bot shell and API `.env` |
-| Notifications silent | Redis up? Bot worker running? Daily cap 5/user |
-| Boost stuck pending | `FEATURE_BOOSTS_ENABLED=true`, bot payment handlers, `SERVICE_JWT_SECRET` |
+| Symptom                     | Check                                                                     |
+| --------------------------- | ------------------------------------------------------------------------- |
+| `Invalid Telegram initData` | Bot token mismatch between bot shell and API `.env`                       |
+| Notifications silent        | Redis up? Bot worker running? Daily cap 5/user                            |
+| Boost stuck pending         | `FEATURE_BOOSTS_ENABLED=true`, bot payment handlers, `SERVICE_JWT_SECRET` |
 
 ## Migrations
 

@@ -13,5 +13,6 @@ export default defineConfig({
     host: true,
     port: Number(process.env.PORT) || 4173,
     strictPort: true,
+    allowedHosts: ['.railway.app', '.trycloudflare.com'],
   },
 });
