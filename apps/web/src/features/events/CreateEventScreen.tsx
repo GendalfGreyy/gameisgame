@@ -19,7 +19,13 @@ import {
 } from './create-event.util.js';
 import { useCreateEvent, useEventTemplates, useGeolocation } from './hooks.js';
 
-export function CreateEventScreen({ onCreated }: { onCreated: (eventId: string) => void }) {
+export function CreateEventScreen({
+  onCreated,
+  onBack,
+}: {
+  onCreated: (eventId: string) => void;
+  onBack?: () => void;
+}) {
   const templates = useEventTemplates();
   const geo = useGeolocation();
   const create = useCreateEvent();
@@ -42,6 +48,7 @@ export function CreateEventScreen({ onCreated }: { onCreated: (eventId: string) 
   if (templates.isLoading) {
     return (
       <section className="space-y-5">
+        {onBack ? <GhostButton onClick={onBack}>← Назад</GhostButton> : null}
         <PageTitle title="Создай за минуту" subtitle="Выбери формат — время и место подставим." />
         <div className="grid grid-cols-2 gap-3">
           <Skeleton className="h-32 rounded-3xl" />
@@ -56,10 +63,8 @@ export function CreateEventScreen({ onCreated }: { onCreated: (eventId: string) 
   if (!selected) {
     return (
       <section className="space-y-5">
-        <PageTitle
-          title="Создай за минуту"
-          subtitle="Выбери формат — время и место подставим."
-        />
+        {onBack ? <GhostButton onClick={onBack}>← Назад</GhostButton> : null}
+        <PageTitle title="Создай за минуту" subtitle="Выбери формат — время и место подставим." />
         <div className="grid grid-cols-2 gap-3">
           {templates.data?.items.map((template, index) => (
             <Stagger key={template.id} index={index}>
@@ -77,7 +82,10 @@ export function CreateEventScreen({ onCreated }: { onCreated: (eventId: string) 
                   aria-hidden
                 />
                 <div className="relative space-y-2">
-                  <span className="animate-float inline-block text-4xl" style={{ animationDelay: `${index * 0.35}s` }}>
+                  <span
+                    className="animate-float inline-block text-4xl"
+                    style={{ animationDelay: `${index * 0.35}s` }}
+                  >
                     {template.emoji}
                   </span>
                   <p className="font-bold leading-tight text-gig-ink">{template.title}</p>
@@ -106,10 +114,7 @@ export function CreateEventScreen({ onCreated }: { onCreated: (eventId: string) 
     <section className="space-y-5">
       <GhostButton onClick={() => setSelected(null)}>← Другой шаблон</GhostButton>
 
-      <PageTitle
-        title={`${selected.emoji} Новое событие`}
-        subtitle="Проверь детали и опубликуй."
-      />
+      <PageTitle title={`${selected.emoji} Новое событие`} subtitle="Проверь детали и опубликуй." />
 
       <label className="block space-y-2">
         <span className="text-sm font-medium text-gig-muted">Название</span>
@@ -144,9 +149,7 @@ export function CreateEventScreen({ onCreated }: { onCreated: (eventId: string) 
         </label>
       </div>
 
-      {geo.error ? (
-        <ErrorBanner message={geo.error} />
-      ) : null}
+      {geo.error ? <ErrorBanner message={geo.error} /> : null}
       {!geo.position && !geo.error ? (
         <p className="text-sm text-gig-muted">Определяю локацию для пина…</p>
       ) : null}
