@@ -21,6 +21,7 @@ import { ModerationModule } from './modules/moderation/moderation.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { PrivacyModule } from './modules/privacy/privacy.module.js';
+import { StudioModule } from './modules/studio/studio.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { RedisModule } from './redis/redis.module.js';
 
@@ -62,6 +63,7 @@ import { RedisModule } from './redis/redis.module.js';
     PaymentsModule,
     PrivacyModule,
     ModerationModule,
+    StudioModule,
   ],
   controllers: [HealthController],
   providers: [
