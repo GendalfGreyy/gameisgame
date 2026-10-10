@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "dev": "env -u TELEGRAM_BOT_TOKEN node --env-file=../../.env ./node_modules/tsx/dist/cli.mjs watch src/main.ts",
+    "dev": "bash ../../scripts/bot-dev.sh",
     "start": "node dist/main.js",
     "test": "vitest run",
     "lint": "echo 'lint runs from root' && exit 0",
