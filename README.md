@@ -34,16 +34,36 @@ pnpm build
 
 ```
 apps/
-  api/    NestJS backend (auth, events, check-ins, points, payments, moderation)
-  web/    React + Vite Mini App (MapLibre, Tailwind, TanStack Query, Zustand)
-  bot/    grammY bot (commands, deep links, BullMQ notification consumer)
+  api/           NestJS backend (Game is Game)
+  web/           React + Vite Mini App (Game is Game)
+  bot/           grammY bot
+  studio/        TG Creator Studio editor shell (@tg-creator/studio)
+  player/        TG Creator public player shell (@tg-creator/player)
+  creator-api/   Creator Studio NestJS API (@tg-creator/creator-api)
+  worker/        Creator background worker (Planned)
 packages/
-  shared/ Cross-package types, zod schemas, domain constants
-  db/     Prisma schema + migrations + seed
-  config/ Shared ESLint and Prettier config
+  shared/        Game is Game shared types
+  db/            Game is Game Prisma
+  creator-shared / project-schema / editor-core / …  Creator packages (@tg-creator/*)
+  config/        Shared ESLint and Prettier config
+tg-creator-studio/   Product spec v1.1 + prompts + ARCHITECTURE mapping
 docs/
   ARCHITECTURE.md      System overview + mermaid diagrams
   PHASES/              Phased implementation roadmap
 ```
 
-See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for the big picture and [`CLAUDE.md`](./CLAUDE.md) for conventions enforced by Claude Code sessions.
+## TG Creator Studio (G0)
+
+Node **22** (`.nvmrc`), pnpm **9.15.0**. Spec: [`tg-creator-studio/`](./tg-creator-studio/).
+
+```bash
+docker compose up -d
+pnpm install
+# migrate creator tables (same Postgres as Game is Game)
+CREATOR_DATABASE_URL="$DATABASE_URL" pnpm --filter @tg-creator/creator-api prisma migrate deploy
+pnpm --filter @tg-creator/creator-api dev   # :3010  GET /health
+pnpm --filter @tg-creator/studio dev        # :5174
+pnpm --filter @tg-creator/player dev        # :5175
+```
+
+See [`tg-creator-studio/ARCHITECTURE.md`](./tg-creator-studio/ARCHITECTURE.md) and [`CLAUDE.md`](./CLAUDE.md).

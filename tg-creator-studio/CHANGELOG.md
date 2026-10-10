@@ -2,6 +2,12 @@
 
 Формат: дата, версия, изменённые файлы и причина. Любая правка docs/ обязана получить запись здесь — это журнал источника истины.
 
+## 1.1.1 — 2026-10-10 (G0 implementation)
+
+- Реализован G0 Infra в monorepo game-is-game: `apps/studio`, `apps/player`, `apps/creator-api`, `apps/worker`, `packages/project-schema`, `packages/creator-shared` (`@tg-creator/shared`), Planned stubs engine/editor/…
+- `docs/06-ERROR-CATALOG.md`: добавлены `INTERNAL_ERROR`, `SERVICE_UNAVAILABLE`.
+- `ARCHITECTURE.md`, `TASKS.md`, `IMPLEMENTED.md` синхронизированы со статусом G0 Completed.
+
 ## 1.1 — 2026-10-10
 
 - README: исправлен перечень промптов (было «01–12», фактически 00–14); добавлена таблица «промпт → gate»; добавлена ссылка на `docs/06-ERROR-CATALOG.md`.

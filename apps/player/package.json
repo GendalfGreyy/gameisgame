@@ -1,0 +1,30 @@
+{
+  "name": "@tg-creator/player",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TG Creator Studio public player shell (no editor).",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "start": "vite preview --host 0.0.0.0 --port ${PORT:-4175}",
+    "dev": "vite",
+    "test": "vitest run",
+    "lint": "echo 'lint runs from root' && exit 0",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@tg-creator/project-schema": "workspace:*",
+    "@tg-creator/shared": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "vitest": "^3.0.4"
+  }
+}

@@ -1,0 +1,21 @@
+:root {
+  color-scheme: dark;
+  --player-bg: #070b10;
+  --player-ink: #f2f6fa;
+  --player-muted: #93a4b5;
+  --player-accent: #5ec8ff;
+  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: var(--player-bg);
+  color: var(--player-ink);
+}
