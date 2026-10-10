@@ -20,9 +20,12 @@ const TEMPLATES: { id: StudioTemplateId; title: string; blurb: string }[] = [
 export function StudioHubScreen({
   onOpenProject,
   onBack,
+  hideBack = false,
 }: {
   onOpenProject: (projectId: string) => void;
   onBack: () => void;
+  /** Standalone studio Mini App has no parent screen. */
+  hideBack?: boolean;
 }) {
   const projects = useStudioProjects();
   const create = useCreateStudioProject();
@@ -42,9 +45,11 @@ export function StudioHubScreen({
     <section className="flex flex-1 flex-col gap-5">
       <header className="flex items-start justify-between gap-3">
         <div className="space-y-1">
-          <GhostButton onClick={onBack} className="mb-1">
-            ← Назад
-          </GhostButton>
+          {!hideBack ? (
+            <GhostButton onClick={onBack} className="mb-1">
+              ← Назад
+            </GhostButton>
+          ) : null}
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gig-accent">
             Creator Studio
           </p>
