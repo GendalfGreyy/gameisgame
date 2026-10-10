@@ -1,4 +1,4 @@
-import { parseEventStartParam } from '@game-is-game/shared';
+import { parseEventStartParam, parseStudioGameStartParam } from '@game-is-game/shared';
 import { useEffect, useState } from 'react';
 
 import {
@@ -17,6 +17,10 @@ import { HostQrScreen } from './features/host/HostQrScreen.js';
 import { AdminScreen } from './features/moderation/AdminScreen.js';
 import { LeaderboardScreen } from './features/social/LeaderboardScreen.js';
 import { SquadScreen } from './features/social/SquadScreen.js';
+import { CreateHubScreen } from './features/studio/CreateHubScreen.js';
+import { StudioEditorScreen } from './features/studio/StudioEditorScreen.js';
+import { StudioHubScreen } from './features/studio/StudioHubScreen.js';
+import { StudioPlayScreen } from './features/studio/StudioPlayScreen.js';
 import { getStartParam } from './shared/lib/telegram.js';
 import { BottomNav, type MainTab } from './shared/ui/BottomNav.js';
 import { ErrorBanner, PrimaryButton } from './shared/ui/primitives.js';
@@ -26,7 +30,11 @@ type StackScreen =
   | { name: 'host-qr'; eventId: string }
   | { name: 'friends' }
   | { name: 'settings' }
-  | { name: 'admin' };
+  | { name: 'admin' }
+  | { name: 'create-event' }
+  | { name: 'studio-hub' }
+  | { name: 'studio-editor'; projectId: string }
+  | { name: 'studio-play'; projectId: string; preferPublished?: boolean };
 
 export function App() {
   const user = useAuthStore((state) => state.user);
@@ -41,9 +49,15 @@ export function App() {
     if (!user) {
       return;
     }
-    const eventId = parseEventStartParam(getStartParam());
+    const start = getStartParam();
+    const eventId = parseEventStartParam(start);
     if (eventId) {
       setStack({ name: 'event', eventId });
+      return;
+    }
+    const gameId = parseStudioGameStartParam(start);
+    if (gameId) {
+      setStack({ name: 'studio-play', projectId: gameId, preferPublished: true });
     }
   }, [user]);
 
@@ -66,7 +80,8 @@ export function App() {
                 Где сейчас гейм?
               </h1>
               <p className="text-[15px] leading-relaxed text-gig-muted">
-                События рядом, друзья на месте, очки за реальные чек-ины.
+                События рядом, друзья на месте, очки за реальные чек-ины — и Creator Studio для
+                своих игр.
               </p>
             </div>
             <PrimaryButton
@@ -85,7 +100,10 @@ export function App() {
         ) : null}
 
         {user && stack === null && tab === 'create' ? (
-          <CreateEventScreen onCreated={openEvent} />
+          <CreateHubScreen
+            onCreateEvent={() => setStack({ name: 'create-event' })}
+            onOpenStudio={() => setStack({ name: 'studio-hub' })}
+          />
         ) : null}
 
         {user && stack === null && tab === 'leaderboard' ? <LeaderboardScreen /> : null}
@@ -97,6 +115,40 @@ export function App() {
             onOpenFriends={() => setStack({ name: 'friends' })}
             onOpenSettings={() => setStack({ name: 'settings' })}
             onOpenAdmin={() => setStack({ name: 'admin' })}
+          />
+        ) : null}
+
+        {user && stack?.name === 'create-event' ? (
+          <CreateEventScreen onCreated={openEvent} onBack={() => setStack(null)} />
+        ) : null}
+
+        {user && stack?.name === 'studio-hub' ? (
+          <StudioHubScreen
+            onBack={() => setStack(null)}
+            onOpenProject={(projectId) => setStack({ name: 'studio-editor', projectId })}
+          />
+        ) : null}
+
+        {user && stack?.name === 'studio-editor' ? (
+          <StudioEditorScreen
+            projectId={stack.projectId}
+            onBack={() => setStack({ name: 'studio-hub' })}
+            onPlay={() => setStack({ name: 'studio-play', projectId: stack.projectId })}
+          />
+        ) : null}
+
+        {user && stack?.name === 'studio-play' ? (
+          <StudioPlayScreen
+            projectId={stack.projectId}
+            preferPublished={stack.preferPublished === true}
+            onBack={() =>
+              setStack(
+                stack.preferPublished === true
+                  ? null
+                  : { name: 'studio-editor', projectId: stack.projectId },
+              )
+            }
+            onEdit={() => setStack({ name: 'studio-editor', projectId: stack.projectId })}
           />
         ) : null}
 

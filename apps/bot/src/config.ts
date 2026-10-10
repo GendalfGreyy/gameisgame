@@ -13,4 +13,6 @@ export const botConfig = {
   apiUrl: process.env.API_PUBLIC_URL ?? 'http://localhost:3001',
   /** Static token for internal api routes; squad linking is disabled when unset. */
   serviceToken: process.env.SERVICE_JWT_SECRET ?? null,
+  /** When true, /start copy targets the constructor-only Mini App. */
+  studioMiniApp: process.env.STUDIO_MINI_APP === 'true',
 };

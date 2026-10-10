@@ -1,8 +1,13 @@
-import { parseEventStartParam, parseReferralStartParam } from '@game-is-game/shared';
+import {
+  parseEventStartParam,
+  parseReferralStartParam,
+  parseStudioGameStartParam,
+} from '@game-is-game/shared';
 
 export type StartIntent =
   | { kind: 'referral'; userId: string }
   | { kind: 'event'; eventId: string }
+  | { kind: 'studio-game'; projectId: string }
   | { kind: 'none' };
 
 export function parseStartPayload(payload: string | undefined): StartIntent {
@@ -18,6 +23,11 @@ export function parseStartPayload(payload: string | undefined): StartIntent {
   const eventId = parseEventStartParam(payload);
   if (eventId) {
     return { kind: 'event', eventId };
+  }
+
+  const projectId = parseStudioGameStartParam(payload);
+  if (projectId) {
+    return { kind: 'studio-game', projectId };
   }
 
   return { kind: 'none' };
