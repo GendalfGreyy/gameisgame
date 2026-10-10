@@ -1,0 +1,13 @@
+# Railway service: studio (Creator Studio Mini App only)
+# Config file path = apps/web/railway.studio.toml
+# Set VITE_STUDIO_ONLY=true and VITE_API_URL before build.
+
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @game-is-game/shared build && pnpm --filter @game-is-game/web build"
+
+[deploy]
+startCommand = "pnpm --filter @game-is-game/web start"
+healthcheckPath = "/"
+healthcheckTimeout = 120
+restartPolicyType = "on_failure"

@@ -24,6 +24,19 @@ export function parseEventStartParam(startParam: string | undefined): string | n
   return eventId.length >= 8 ? eventId : null;
 }
 
+/** Mini App startapp payload: open a published Studio game. */
+export function encodeStudioGameStartParam(projectId: string): string {
+  return `game_${projectId}`;
+}
+
+export function parseStudioGameStartParam(startParam: string | undefined): string | null {
+  if (!startParam?.startsWith('game_')) {
+    return null;
+  }
+  const projectId = startParam.slice(5);
+  return projectId.length >= 8 ? projectId : null;
+}
+
 export function buildMiniAppDeepLink(botUsername: string, startParam: string): string {
   const username = botUsername.replace(/^@/, '');
   return `https://t.me/${username}?startapp=${encodeURIComponent(startParam)}`;

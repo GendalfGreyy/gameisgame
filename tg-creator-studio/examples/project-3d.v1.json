@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "project_example_3d",
+  "ownerId": "user_example",
+  "title": "Мой первый 3D-мир",
+  "type": "game3d",
+  "settings": { "orientation": "auto", "quality": "auto" },
+  "entrySceneId": "scene_main",
+  "scenes": [
+    {
+      "id": "scene_main",
+      "name": "Main Scene",
+      "rootEntityIds": ["entity_cube", "entity_camera"],
+      "entities": {
+        "entity_cube": {
+          "id": "entity_cube",
+          "name": "Cube",
+          "parentId": null,
+          "childIds": [],
+          "enabled": true,
+          "components": [
+            {
+              "id": "cmp_transform_cube",
+              "type": "transform",
+              "enabled": true,
+              "data": { "position": [0, 1, 0], "rotationEuler": [0, 0, 0], "scale": [1, 1, 1] }
+            },
+            {
+              "id": "cmp_mesh_cube",
+              "type": "mesh",
+              "enabled": true,
+              "data": { "primitive": "box" }
+            },
+            {
+              "id": "cmp_material_cube",
+              "type": "material",
+              "enabled": true,
+              "data": { "baseColor": "#8175F5", "roughness": 0.7, "metalness": 0.0 }
+            }
+          ]
+        },
+        "entity_camera": {
+          "id": "entity_camera",
+          "name": "Camera",
+          "parentId": null,
+          "childIds": [],
+          "enabled": true,
+          "components": [
+            {
+              "id": "cmp_transform_camera",
+              "type": "transform",
+              "enabled": true,
+              "data": { "position": [5, 4, 6], "rotationEuler": [-20, 35, 0], "scale": [1, 1, 1] }
+            },
+            {
+              "id": "cmp_camera",
+              "type": "camera",
+              "enabled": true,
+              "data": { "fov": 60, "nearClip": 0.1, "farClip": 1000 }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "pages": [],
+  "graphs": [],
+  "assetRefs": [],
+  "globalVariables": {}
+}
