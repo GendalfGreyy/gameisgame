@@ -196,13 +196,28 @@ export function ProjectPage({ projectId }: { projectId: string }) {
           <section className="viewport blueprint enter" aria-label="Предпросмотр">
             <span className="viewport__label mono">Вьюпорт</span>
             <TypeArt type={project.type} className="viewport__art" />
-            <div className="notice" role="note">
-              <strong>Редактор в разработке</strong>
-              <span>
-                Сцена, иерархия и инспектор появятся на этапах G3–G4. Черновик уже сохранён на
-                сервере — ниже его текущая структура.
-              </span>
-            </div>
+            {project.type === 'app' ? (
+              <div className="notice" role="note">
+                <strong>Конструктор приложений — этап G9</strong>
+                <span>Черновик уже сохранён на сервере — ниже его текущая структура страниц.</span>
+              </div>
+            ) : (
+              <div className="notice" role="note">
+                <strong>Редактор сцены</strong>
+                <span>
+                  Иерархия, инспектор, отмена действий и сохранение в облако. 3D-вьюпорт с рендером
+                  подключается на этапе G4, пока сцена показана схемой.
+                </span>
+                <button
+                  type="button"
+                  className="btn btn--primary"
+                  data-testid="open-editor"
+                  onClick={() => navigate({ name: 'editor', projectId: project.id })}
+                >
+                  Открыть редактор
+                </button>
+              </div>
+            )}
           </section>
           <section className="card panel enter" style={{ '--i': 1 }}>
             <h2 className="panel__title">Структура черновика</h2>

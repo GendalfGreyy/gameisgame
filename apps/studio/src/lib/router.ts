@@ -11,6 +11,7 @@ export type Route =
   | { name: 'dashboard' }
   | { name: 'wizard'; type?: ProjectTypeDto }
   | { name: 'project'; projectId: string }
+  | { name: 'editor'; projectId: string }
   | { name: 'settings' }
   | { name: 'notFound' };
 
@@ -25,6 +26,10 @@ export function parseRoute(pathname: string, search = ''): Route {
   }
   if (path === '/settings') {
     return { name: 'settings' };
+  }
+  const editor = /^\/projects\/([^/]+)\/edit$/.exec(path);
+  if (editor?.[1]) {
+    return { name: 'editor', projectId: decodeURIComponent(editor[1]) };
   }
   const project = /^\/projects\/([^/]+)$/.exec(path);
   if (project?.[1]) {
@@ -43,6 +48,8 @@ export function routePath(route: Route): string {
       return '/settings';
     case 'project':
       return `/projects/${encodeURIComponent(route.projectId)}`;
+    case 'editor':
+      return `/projects/${encodeURIComponent(route.projectId)}/edit`;
     case 'notFound':
       return '/';
   }

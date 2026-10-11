@@ -1,6 +1,74 @@
-/**
- * @tg-creator/editor-core — Planned until its gate (see tg-creator-studio/TASKS.md).
- * G0 only exports a package marker so the monorepo typechecks/builds.
- */
-export const PACKAGE_STATUS = 'Planned' as const;
-export const PACKAGE_NAME = '@tg-creator/editor-core' as const;
+export {
+  applyCommand,
+  type ApplyOptions,
+  type ApplyResult,
+  type CommandError,
+  type CommandErrorCode,
+  type EditorCommand,
+  type EditorCommandType,
+} from './commands.js';
+export {
+  ENTITY_PRESETS,
+  addComponentCommand,
+  addableComponentTypes,
+  createEntityCommand,
+  duplicateEntityCommand,
+  findComponent,
+  presetsFor,
+  setComponentEnabledCommand,
+  setTransformCommand,
+  uniqueSiblingName,
+  updateComponentCommand,
+  type CreateEntityInput,
+  type EntityPreset,
+  type EntityPresetId,
+} from './factories.js';
+export { createIdGenerator, createSequentialIdGenerator, type IdGenerator } from './ids.js';
+export {
+  IDENTITY,
+  composeTransform,
+  invertLinear,
+  multiply,
+  parentWorldMatrix,
+  transformDirection,
+  transformPoint,
+  worldDeltaToLocal,
+  worldMatrix,
+  worldPosition,
+  type Mat4,
+} from './math.js';
+export {
+  COMPONENT_LABELS,
+  cameraDataForProjection,
+  componentProperties,
+  type PropertyControl,
+  type PropertyDescriptor,
+} from './properties.js';
+export {
+  collectSubtree,
+  findScene,
+  flattenHierarchy,
+  getEntity,
+  isSelfOrDescendant,
+  siblingIds,
+} from './scene.js';
+export {
+  HISTORY_LIMIT,
+  activeScene,
+  canRedo,
+  canUndo,
+  createEditorSession,
+  isDirty,
+  saveIndicator,
+  type DispatchOptions,
+  type DispatchResult,
+  type EditorSession,
+  type EditorSessionInit,
+  type EditorState,
+  type HistoryEntry,
+  type LogEntry,
+  type SaveFailure,
+  type SaveIndicator,
+  type SaveState,
+  type SaveTicket,
+} from './session.js';

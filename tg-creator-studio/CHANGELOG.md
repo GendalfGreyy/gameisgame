@@ -2,6 +2,14 @@
 
 Формат: дата, версия, изменённые файлы и причина. Любая правка docs/ обязана получить запись здесь — это журнал источника истины.
 
+## 1.1.5 — 2026-10-11 (G3 Editor core)
+
+- `docs/03-ENGINE-ARCHITECTURE.md` §5.1: описан фактический `editor-core` — сериализуемые команды с точными inverse, чистое применение, интеграция с `validateProjectDocument`, история с merge-группами, dirty по версии, тикеты сохранения и блокировка при конфликте, соглашение о Transform (градусы, `Rz·Ry·Rx`), SVG-схема вместо viewport до G4.
+- `docs/02-UX-SCREENS.md` §3–4: отмечено реализованное в G3 — порог desktop ≥ 1024 px, правила показа Undo/Redo/Save, состояния индикатора сохранения, горячие клавиши, mobile sheets и действия без клавиатуры; Rotate/Scale gizmo, Orbit и resize панелей — G4.
+- `project-schema`: схема **не менялась** (миграция не требуется); экспортированы лимиты `ID_MAX`, `NAME_MAX`, `TEXT_MAX`.
+- `docs/06`: новых API-кодов нет (ошибки команд редактора — клиентские).
+- TASKS/IMPLEMENTED: G3 Completed.
+
 ## 1.1.4 — 2026-10-11 (G2 Project schema)
 
 - `docs/03-ENGINE-ARCHITECTURE.md` §4: набросок модели заменён фактической формой `ProjectDocument` **schemaVersion 2** (строгие объекты, discriminated unions для `data` компонентов, камеры, виджетов App, действий, `TypedValue`; `name` у страниц/графов, `position` у узлов, `entrySceneId: Id | null`), описаны правила целостности и цепочка миграций. Причина: промпт 03 требует типизированных компонентов вместо `data: unknown`.
