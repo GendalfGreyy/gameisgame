@@ -170,8 +170,7 @@ export class CheckInsService {
     // presence via the rotating token and confirms immediately.
     const requiresDwell = input.method === 'gps';
     const resolved = this.resolveStatus(fraudScore);
-    const status: CheckInStatus =
-      requiresDwell && resolved === 'confirmed' ? 'pending' : resolved;
+    const status: CheckInStatus = requiresDwell && resolved === 'confirmed' ? 'pending' : resolved;
 
     const checkIn = await this.prisma.$transaction(async (tx) => {
       const created = await tx.checkIn.create({

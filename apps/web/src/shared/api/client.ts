@@ -79,7 +79,10 @@ async function apiRequestInner<T>(path: string, options: RequestOptions = {}): P
 
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as { message?: string } | null;
-    throw new ApiError(errorBody?.message ?? `Request failed with ${response.status}`, response.status);
+    throw new ApiError(
+      errorBody?.message ?? `Request failed with ${response.status}`,
+      response.status,
+    );
   }
 
   return (await response.json()) as T;

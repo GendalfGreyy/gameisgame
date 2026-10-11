@@ -90,10 +90,24 @@ export class FriendsService {
       },
       include: {
         requester: {
-          select: { id: true, firstName: true, username: true, photoUrl: true, totalPoints: true, deletedAt: true },
+          select: {
+            id: true,
+            firstName: true,
+            username: true,
+            photoUrl: true,
+            totalPoints: true,
+            deletedAt: true,
+          },
         },
         addressee: {
-          select: { id: true, firstName: true, username: true, photoUrl: true, totalPoints: true, deletedAt: true },
+          select: {
+            id: true,
+            firstName: true,
+            username: true,
+            photoUrl: true,
+            totalPoints: true,
+            deletedAt: true,
+          },
         },
       },
     });

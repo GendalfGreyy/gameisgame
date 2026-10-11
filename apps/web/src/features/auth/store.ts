@@ -5,11 +5,7 @@ type AuthState = {
   accessToken: string | null;
   refreshToken: string | null;
   user: UserProfile | null;
-  setSession: (params: {
-    accessToken: string;
-    refreshToken: string;
-    user: UserProfile;
-  }) => void;
+  setSession: (params: { accessToken: string; refreshToken: string; user: UserProfile }) => void;
   setUser: (user: UserProfile) => void;
   updateAccessToken: (accessToken: string) => void;
   clearSession: () => void;

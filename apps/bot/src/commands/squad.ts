@@ -16,9 +16,7 @@ export function registerSquadCommand(bot: Bot) {
 
     const code = context.match?.trim().toUpperCase();
     if (!code) {
-      await context.reply(
-        'Укажи инвайт-код: /squad ABCD2345\nКод видно в Mini App → My Squad.',
-      );
+      await context.reply('Укажи инвайт-код: /squad ABCD2345\nКод видно в Mini App → My Squad.');
       return;
     }
 

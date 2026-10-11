@@ -22,9 +22,7 @@ export function AdminScreen({ onBack }: { onBack: () => void }) {
       </div>
 
       {reports.isLoading ? <p className="text-sm text-white/60">Загружаю…</p> : null}
-      {reports.error ? (
-        <p className="text-sm text-red-300">{reports.error.message}</p>
-      ) : null}
+      {reports.error ? <p className="text-sm text-red-300">{reports.error.message}</p> : null}
 
       {reports.data && reports.data.items.length === 0 ? (
         <p className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
@@ -59,9 +57,7 @@ export function AdminScreen({ onBack }: { onBack: () => void }) {
               <button
                 type="button"
                 disabled={review.isPending}
-                onClick={() =>
-                  review.mutate({ reportId: report.id, body: { status: 'actioned' } })
-                }
+                onClick={() => review.mutate({ reportId: report.id, body: { status: 'actioned' } })}
                 className="flex-1 rounded-lg bg-red-500/80 py-2 text-xs font-medium text-white"
               >
                 Принять меры

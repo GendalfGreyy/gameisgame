@@ -1,10 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue, Worker } from 'bullmq';
 
@@ -31,10 +25,7 @@ const WINBACK_MAX_SILENT_DAYS = 14;
 const WINBACK_COOLDOWN_DAYS = 14;
 const MAX_DIGEST_EVENTS = 3;
 
-type DigestJob =
-  | { kind: 'tonight_digest' }
-  | { kind: 'winback' }
-  | { kind: 'squad_recap' };
+type DigestJob = { kind: 'tonight_digest' } | { kind: 'winback' } | { kind: 'squad_recap' };
 
 type NotificationJob = {
   type: 'tonight_digest' | 'winback' | 'squad_recap';
@@ -64,18 +55,30 @@ export class DigestService implements OnModuleInit, OnModuleDestroy {
     this.digestQueue = new Queue<DigestJob>(DIGEST_QUEUE, { connection });
     this.notificationQueue = new Queue<NotificationJob>(NOTIFICATION_QUEUE, { connection });
 
-    await this.digestQueue.upsertJobScheduler('tonight-digest', { pattern: TONIGHT_DIGEST_CRON }, {
-      name: 'tonight-digest',
-      data: { kind: 'tonight_digest' },
-    });
-    await this.digestQueue.upsertJobScheduler('winback', { pattern: WINBACK_CRON }, {
-      name: 'winback',
-      data: { kind: 'winback' },
-    });
-    await this.digestQueue.upsertJobScheduler('squad-recap', { pattern: SQUAD_RECAP_CRON }, {
-      name: 'squad-recap',
-      data: { kind: 'squad_recap' },
-    });
+    await this.digestQueue.upsertJobScheduler(
+      'tonight-digest',
+      { pattern: TONIGHT_DIGEST_CRON },
+      {
+        name: 'tonight-digest',
+        data: { kind: 'tonight_digest' },
+      },
+    );
+    await this.digestQueue.upsertJobScheduler(
+      'winback',
+      { pattern: WINBACK_CRON },
+      {
+        name: 'winback',
+        data: { kind: 'winback' },
+      },
+    );
+    await this.digestQueue.upsertJobScheduler(
+      'squad-recap',
+      { pattern: SQUAD_RECAP_CRON },
+      {
+        name: 'squad-recap',
+        data: { kind: 'squad_recap' },
+      },
+    );
 
     this.worker = new Worker<DigestJob>(
       DIGEST_QUEUE,
@@ -155,7 +158,9 @@ export class DigestService implements OnModuleInit, OnModuleDestroy {
       });
     }
 
-    this.logger.log(`Tonight digest queued for ${recipients.length} users, ${events.length} events`);
+    this.logger.log(
+      `Tonight digest queued for ${recipients.length} users, ${events.length} events`,
+    );
   }
 
   /**
@@ -220,7 +225,11 @@ export class DigestService implements OnModuleInit, OnModuleDestroy {
     const weekMs = 7 * 24 * 60 * 60 * 1000;
     const day = now.getUTCDay();
     const monday = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (day === 0 ? 6 : day - 1)),
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() - (day === 0 ? 6 : day - 1),
+      ),
     );
     const prevMonday = new Date(monday.getTime() - weekMs);
 

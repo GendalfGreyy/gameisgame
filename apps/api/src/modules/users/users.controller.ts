@@ -22,7 +22,9 @@ export class UsersController {
   @Get('lookup')
   lookup(
     @Query(new ZodValidationPipe(lookupUserQuerySchema))
-    query: { username: string },
+    query: {
+      username: string;
+    },
   ) {
     return this.usersService.lookupByUsername(query.username);
   }
