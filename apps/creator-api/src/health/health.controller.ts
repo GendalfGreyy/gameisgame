@@ -1,7 +1,9 @@
 import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
 
+import { Public } from '../auth/public.decorator.js';
 import { HealthService } from './health.service.js';
 
+@Public()
 @Controller()
 export class HealthController {
   private readonly health: HealthService;

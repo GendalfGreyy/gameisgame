@@ -49,6 +49,12 @@
 | `PUBLISH_LINK_NOT_CONFIGURED` | Bot username не задан — честный отказ вместо фиктивной ссылки    |
 | `ALREADY_UNPUBLISHED`         | Публичный alias уже снят                                         |
 
+## Запросы (422)
+
+| Код                 | Когда                                                                         |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `VALIDATION_FAILED` | Тело/параметры запроса (не ProjectDocument) не прошли схему; `details.issues` |
+
 ## Runtime/Data Collections (403/422)
 
 | Код                    | Когда                                          |

@@ -2,7 +2,7 @@
   "name": "@tg-creator/telegram",
   "version": "0.0.0",
   "private": true,
-  "description": "Telegram Mini App bridge (Planned G1)",
+  "description": "Isolated Telegram Mini App bridge with browser fallback (G1)",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

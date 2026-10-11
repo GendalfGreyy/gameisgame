@@ -1,6 +1,22 @@
-/**
- * @tg-creator/ui-kit — Planned until its gate (see tg-creator-studio/TASKS.md).
- * G0 only exports a package marker so the monorepo typechecks/builds.
- */
-export const PACKAGE_STATUS = 'Planned' as const;
-export const PACKAGE_NAME = '@tg-creator/ui-kit' as const;
+export {
+  DARK_TOKENS,
+  DEFAULT_DENSITY,
+  DEFAULT_THEME_PREFERENCE,
+  DENSITIES,
+  LIGHT_TOKENS,
+  THEME_PREFERENCES,
+  contrastRatio,
+  isDensity,
+  isThemePreference,
+  resolveTheme,
+  schemeOfColor,
+  themeToCssVars,
+  tokensFromTelegram,
+  type ColorScheme,
+  type Density,
+  type ResolvedTheme,
+  type TelegramThemeParams,
+  type ThemeContext,
+  type ThemePreference,
+  type ThemeTokens,
+} from './theme.js';

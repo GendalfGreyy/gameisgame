@@ -32,3 +32,11 @@ export {
   type SceneEntity,
   type TypedValue,
 } from './v1.js';
+export {
+  PROJECT_TEMPLATE_IDS,
+  cloneProjectDocument,
+  createProjectDocument,
+  type CreateProjectDocumentInput,
+  type ProjectOrientation,
+  type ProjectTemplateId,
+} from './templates.js';

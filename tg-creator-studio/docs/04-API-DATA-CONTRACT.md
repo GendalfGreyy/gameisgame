@@ -6,28 +6,36 @@
 
 ## 2. Auth
 
-| Метод / URI           | Назначение                           | Авторизация                  |
-| --------------------- | ------------------------------------ | ---------------------------- |
-| `POST /auth/telegram` | `{initData}` → session, user profile | Проверенная подпись initData |
-| `GET /me`             | Текущий пользователь, квоты          | session                      |
-| `POST /auth/logout`   | Завершить сессию                     | session                      |
+| Метод / URI             | Назначение                                   | Авторизация                  |
+| ----------------------- | -------------------------------------------- | ---------------------------- |
+| `POST /auth/telegram`   | `{initData}` → session, user profile         | Проверенная подпись initData |
+| `POST /auth/dev`        | `{telegramId?,firstName?,username?}` → то же | только development + флаг    |
+| `GET /me`               | Текущий пользователь, квоты, preferences     | session                      |
+| `PATCH /me/preferences` | `{theme?, density?}` → preferences           | session                      |
+| `POST /auth/logout`     | Завершить сессию                             | session                      |
 
 Реализовать проверку подписи по официальному Telegram алгоритму, `auth_date` replay window, timing-safe comparison, test vectors; не сохранять raw initData в логи. Dev auth только при явном `NODE_ENV=development` и отдельном config flag, с hard block в production.
 
+Session — непрозрачный bearer-токен (`Authorization: Bearer tgc_…`); в БД хранится только SHA-256. Ответ `POST /auth/*`: `{token, expiresAt, user}`. `GET /me`: `{user, preferences, quotas:{projects:{used,limit}}, session:{expiresAt}}`.
+
+**Preferences** (S18): `theme ∈ telegram | system | dark | light` (по умолчанию `telegram`), `density ∈ comfortable | compact` (по умолчанию `comfortable`). Хранятся на сервере per user, клиент применяет мгновенно и кэширует локально. Схемы — `@tg-creator/shared` (`userPreferencesSchema`).
+
 ## 3. Projects + Drafts
 
-| Метод / URI                    | Payload / результат                                    | Требуемое право        |
-| ------------------------------ | ------------------------------------------------------ | ---------------------- |
-| `GET /projects?cursor=&type=`  | Pageable list, lastEditedAt                            | owner/editor           |
-| `POST /projects`               | `{title,type,templateId?}` → projectId/revision        | authenticated          |
-| `GET /projects/:id`            | metadata + current draft revision                      | project reader         |
-| `GET /projects/:id/draft`      | full `ProjectDocument`, revision                       | project reader         |
-| `PUT /projects/:id/draft`      | `{document, baseRevision, mutationId}` → next revision | project editor         |
-| `PATCH /projects/:id/metadata` | `{title,description,visibility}`                       | project editor         |
-| `POST /projects/:id/duplicate` | clone → new project                                    | project reader + quota |
-| `POST /projects/:id/archive`   | archive flag                                           | owner                  |
-| `DELETE /projects/:id`         | soft delete + grace policy                             | owner                  |
-| `GET /projects/:id/versions`   | page published/draft snapshots                         | reader                 |
+| Метод / URI                             | Payload / результат                                    | Требуемое право        |
+| --------------------------------------- | ------------------------------------------------------ | ---------------------- |
+| `GET /projects?cursor=&type=&q=&limit=` | Pageable list, lastEditedAt                            | owner/editor           |
+| `POST /projects`                        | `{title,type,templateId?}` → projectId/revision        | authenticated          |
+| `GET /projects/:id`                     | metadata + current draft revision                      | project reader         |
+| `GET /projects/:id/draft`               | full `ProjectDocument`, revision                       | project reader         |
+| `PUT /projects/:id/draft`               | `{document, baseRevision, mutationId}` → next revision | project editor         |
+| `PATCH /projects/:id/metadata`          | `{title,description,visibility}`                       | project editor         |
+| `POST /projects/:id/duplicate`          | clone → new project                                    | project reader + quota |
+| `POST /projects/:id/archive`            | archive flag                                           | owner                  |
+| `DELETE /projects/:id`                  | soft delete + grace policy                             | owner                  |
+| `GET /projects/:id/versions`            | page published/draft snapshots                         | reader                 |
+
+`GET /projects` — keyset pagination по `(lastEditedAt desc, id desc)`, ответ `{items, nextCursor}`; `q` — поиск по названию без учёта регистра, `limit` ≤ 50 (по умолчанию 20). `POST /projects` → `201 {projectId, revision, project}`; `templateId ∈ empty | starter`, `orientation ∈ auto | portrait | landscape`. Ошибки тела запроса — `VALIDATION_FAILED` (422).
 
 Для R0 разрешен `PUT` документа с `baseRevision` в transaction. R1 вводит патчи и history journal при необходимости, но не как обязательную преждевременную сложность.
 

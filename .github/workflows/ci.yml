@@ -51,3 +51,66 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+  creator-integration:
+    name: creator · int + e2e (postgres)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: creator
+          POSTGRES_PASSWORD: creator
+          POSTGRES_DB: creator
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U creator"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      CREATOR_DATABASE_URL: postgresql://creator:creator@localhost:5432/creator?schema=creator
+      VITE_CREATOR_API_URL: http://127.0.0.1:3010
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build creator packages
+        run: pnpm turbo run build --filter=@tg-creator/creator-api^... --filter=@tg-creator/studio^...
+
+      - name: Apply creator migrations
+        run: pnpm --filter @tg-creator/creator-api db:deploy
+
+      - name: API integration tests
+        run: pnpm --filter @tg-creator/creator-api test:int
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @tg-creator/studio exec playwright install --with-deps chromium
+
+      - name: Studio E2E
+        run: pnpm --filter @tg-creator/studio test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: studio-playwright
+          path: apps/studio/test-results
+          retention-days: 7
