@@ -8,7 +8,7 @@
 | --------------------------------------------------------------------------------- | --------- | --------------------------------------- |
 | Spec 1.0 body (`docs/01–05`, prompts 01–14, `examples/project-3d.v1.json`)        | Completed | Импортировано из загруженного комплекта |
 | Spec v1.1 upgrade (README, CHANGELOG, docs/06, rules 13–15, DoD, docs/04–05 sync) | Completed | 2026-10-10                              |
-| Runtime / editor code per gates G0+                                               | Partial   | G0–G2 Done; остальные gates Planned     |
+| Runtime / editor code per gates G0+                                               | Partial   | G0–G3 Done; остальные gates Planned     |
 
 ## G0 Infra
 
@@ -68,8 +68,28 @@
 | Идемпотентность `mutationId` (Postgres `draft_mutations`)                   | Completed | повтор/параллельный повтор — без двойного эффекта; `MUTATION_ID_REUSED` |
 | 422 для parentId/циклов/дубликатов/битых ссылок, 413 по размеру             | Completed | ревизия не меняется; `DOCUMENT_TOO_LARGE` (2 MiB / 3 MB тело)           |
 | Перечитывание проекта после перезапуска Node-сервера                        | Completed | int-тест останавливает и поднимает приложение                           |
-| Studio `saveDraft` клиент                                                   | Partial   | вызывающий редактор/автосейв — G3/G5                                    |
+| Studio `saveDraft` клиент                                                   | Partial   | редактор вызывает в G3; автосейв — G5                                   |
 | Ретеншн журнала `draft_mutations`                                           | Planned   | G11                                                                     |
+
+## G3 Editor core
+
+| Item                                                                           | Status    | Notes                                           |
+| ------------------------------------------------------------------------------ | --------- | ----------------------------------------------- |
+| Команды с точными inverse, чистое применение, валидация через schema           | Completed | `packages/editor-core/src/commands.ts`          |
+| Undo/Redo история, merge-группы, лимит 200 шагов                               | Completed | drag в схеме = один шаг                         |
+| Selection, dirty по версии, save-тикеты с `mutationId`, conflict-блок          | Completed | `session.ts`                                    |
+| Тесты inverse / invariants / random sequences / 5000 entities                  | Completed | 28 unit-тестов                                  |
+| Studio desktop layout (toolbar, Иерархия, Viewport, Инспектор, нижние вкладки) | Completed | ≥ 1024 px                                       |
+| Studio mobile layout (fullscreen, инструменты, FAB, sheets, панель выделения)  | Completed | действия без клавиатуры                         |
+| Hierarchy: add/delete/duplicate/rename/reparent/reorder/hide/search            | Completed | DnD на desktop, «Переместить в…» везде          |
+| Inspector: Transform и свойства компонентов через command bus                  | Completed | Reset/Copy/Paste компонента                     |
+| Desktop shortcuts                                                              | Completed | Ctrl+S/Z/Shift+Z/Y/D, Delete, F2, Esc, F, Q/W   |
+| Честный save indicator + `PUT draft` + экран конфликта                         | Completed | «Сохранено» только после ответа сервера         |
+| Viewport                                                                       | Partial   | SVG-схема по данным сцены; реальный canvas — G4 |
+| Rotate/Scale gizmo, Orbit, raycast-размещение                                  | Planned   | G4                                              |
+| Автосейв, IndexedDB offline-очередь                                            | Planned   | G5                                              |
+| Resize панелей, Tab, мульти-выделение                                          | Partial   | вкладка нижней панели запоминается              |
+| Blueprint editor / App Builder                                                 | Planned   | G7 / G9                                         |
 
 ## Product vertical (R0/R1)
 
@@ -77,6 +97,6 @@
 | -------------------------- | --------- |
 | Telegram auth              | Completed |
 | Project CRUD + schema      | Partial   |
-| 3D editor edit/save/reopen | Planned   |
+| 3D editor edit/save/reopen | Partial   |
 | Play mode                  | Planned   |
 | Publish + share link       | Planned   |

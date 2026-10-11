@@ -7,7 +7,7 @@
 | G0   | 01     | Infra               | Completed | Monorepo @tg-creator/\* рядом с GiG    |
 | G1   | 02     | Auth + Dashboard    | Completed | S01–S03 + S18 (тема/плотность)         |
 | G2   | 03     | Project schema      | Completed | schema v2, миграция v1→v2, `PUT draft` |
-| G3   | 04     | Editor core         | Planned   | без Timeline R2                        |
+| G3   | 04     | Editor core         | Completed | команды/Undo, desktop + mobile layout  |
 | G4   | 05     | 3D engine           | Planned   |                                        |
 | G5   | 06     | Assets & Save       | Planned   |                                        |
 | G6   | 07     | Play & Publish      | Planned   |                                        |
@@ -23,8 +23,28 @@
 
 ## Сейчас
 
-- **G0 Infra**, **G1 Auth + Dashboard**, **G2 Project schema** — Completed, см. `IMPLEMENTED.md`.
-- Следующий шаг: **промпт 04** (Editor core, G3) — только после подтверждения.
+- **G0 Infra**, **G1 Auth + Dashboard**, **G2 Project schema**, **G3 Editor core** — Completed, см. `IMPLEMENTED.md`.
+- Следующий шаг: **промпт 05** (3D engine, G4) — только после подтверждения.
+
+### G3 — что сделано
+
+- [x] `@tg-creator/editor-core`: команды `entity.insert/remove/rename/setEnabled/move`, `component.add/remove/update` с точными inverse; чистое применение без мутаций; валидация `data` и целостности через `project-schema`.
+- [x] Фабрики: создание по пресетам, дублирование с новыми ID, уникальные имена, Transform, добавление/удаление/сброс компонентов; таблица свойств Inspector.
+- [x] История Undo/Redo (merge-группы для drag), selection, dirty/save-состояния, тикеты сохранения с `mutationId`, блокировка при конфликте.
+- [x] Тесты: inverse для каждой команды, отсутствие мутаций, случайные последовательности (валидность после каждого шага, полный Undo/Redo), производительность 5000 сущностей.
+- [x] Studio `/projects/:id/edit`: desktop (toolbar, Иерархия, схема сцены, Инспектор, Ассеты/Логика/Консоль) и mobile (fullscreen, инструменты, FAB, панель выделения, bottom sheets).
+- [x] Иерархия: создать, удалить, дублировать, переименовать, перенести (drag-and-drop и «Переместить в…»), порядок, вложить/вынести, скрыть, поиск.
+- [x] Инспектор через command bus; перемещение в схеме сцены — та же команда, один шаг Undo.
+- [x] Честный индикатор сохранения, `PUT draft`, экран конфликта (загрузить с сервера / сохранить копию), предупреждение при уходе с несохранёнными изменениями.
+- [x] Playwright e2e: desktop (полный цикл + перезагрузка, drag + конфликт), mobile (только касания).
+
+### Перенесено / ограничения G3
+
+- Реальный 3D/2D canvas, Rotate/Scale gizmo, Orbit, raycast-размещение — G4 (сейчас SVG-схема с явной подписью).
+- Автосейв, IndexedDB-очередь offline, загрузка ассетов — G5.
+- Изменение размеров панелей и Tab для скрытия — Partial (вкладка нижней панели сохраняется локально).
+- Мульти-выделение — Planned (selection хранит массив, UI выделяет один объект).
+- Blueprint-редактор — G7; App Builder — G9 (для `app`-проектов редактор сцены не открывается).
 
 ### G2 — что сделано
 

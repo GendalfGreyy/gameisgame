@@ -256,6 +256,17 @@ type TypedValue =
 
 На R0 можно передавать целый документ с `If-Match/revision`; patch-протокол вводить после профилирования. Никакой ложной многопользовательской синхронизации до Yjs.
 
+### 5.1. Реализация `editor-core` (G3)
+
+- **Команды** — сериализуемый union `EditorCommand`: `entity.insert` (поддерево в pre-order), `entity.remove`, `entity.rename`, `entity.setEnabled`, `entity.move` (`parentId` + `index`, индекс считается после изъятия узла), `component.add`, `component.remove`, `component.update` (`data` + `enabled`). Создание, дублирование, перенос, вложение/вынос и изменение Transform выражаются через них (фабрики `createEntityCommand`, `duplicateEntityCommand`, `setTransformCommand` и т. д.).
+- **`applyCommand(doc, cmd)`** — чистая функция: исходный документ не мутируется (структурное разделение, проверяется на deep-frozen документах), результат — `{ ok, document, inverse }` либо `{ ok: false, error }`. `inverse` — точная обратная команда; Undo = применение inverse, Redo = исходной команды.
+- **Валидация**: `data` компонента проверяется `componentRecordSchema` из `@tg-creator/project-schema`, после каждой команды — полный `validateProjectDocument`; нарушение целостности отклоняет команду (`INTEGRITY`), документ не меняется. Коды ошибок команд (`ENTITY_NOT_FOUND`, `REPARENT_CYCLE`, `COMPONENT_REQUIRED`, …) — внутренние для клиента, в API не уходят и в docs/06 не входят.
+- **История**: стек `past/future` (лимит 200 шагов), группировка по `mergeKey` (drag в viewport = один шаг Undo), монотонная локальная `version`; `dirty = version ≠ savedVersion`, поэтому Undo до сохранённого состояния снова даёт «Сохранено».
+- **Сохранение**: `beginSave()` выдаёт тикет `{version, baseRevision, mutationId, document}`; повтор той же версии переиспользует `mutationId` (идемпотентность G2). `saveSucceeded` обновляет `serverRevision`; 409 переводит сессию в `conflict` — дальнейшие сохранения блокируются до явного выбора «Загрузить версию с сервера» или «Сохранить мою как копию». Автосейв и IndexedDB-очередь — G5.
+- **Selection** хранит ID и очищается от удалённых сущностей после каждой команды/Undo.
+- **Transform**: углы в градусах, порядок `R = Rz·Ry·Rx`, `World = Parent · T · R · S` (соглашение PlayCanvas). `worldDeltaToLocal` переводит перемещение мыши/пальца в локальные координаты родителя.
+- **Viewport до G4**: Studio рисует SVG-схему по данным документа (3D — вид сверху X/Z, 2D — X/Y). Это не рендер движка и так подписано в UI; реальный canvas PlayCanvas/PixiJS подключается в G4 к тем же командам.
+
 ## 6. Edit / Play / Published Runtime
 
 ```text
