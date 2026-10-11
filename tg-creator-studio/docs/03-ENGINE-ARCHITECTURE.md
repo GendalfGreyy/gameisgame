@@ -60,84 +60,187 @@ tg-creator-studio/
 
 Зависимости идут от приложений к packages, **не наоборот**. `editor-core` не импортирует PlayCanvas/Pixi; `project-schema` не импортирует React. Player **не импортирует** editor-core и admin API; он выполняет только подписанный/валидированный опубликованный manifest.
 
-## 4. Модель данных (нормативный набросок)
+## 4. Модель данных (schemaVersion 2)
+
+Нормативный источник — Zod-схемы `packages/project-schema/src/v2.ts`; ниже их форма. Все объекты строгие (`.strict()`): неизвестное поле — ошибка, а не молча отброшенный ключ. `data` компонента, props виджета и `TypedValue` — discriminated unions, `unknown` в документе не остаётся.
 
 ```ts
 type ProjectType = 'game3d' | 'game2d' | 'app';
-type ComponentType =
-  | 'transform'
-  | 'mesh'
-  | 'material'
-  | 'camera'
-  | 'light'
-  | 'rigidBody3d'
-  | 'collider3d'
-  | 'sprite'
-  | 'collider2d'
-  | 'audio'
-  | 'playerController'
-  | 'scriptGraph';
+type Id = string; // /^[A-Za-z0-9_-]+$/, ≤ 64; ID сущностей уникальны во всём документе
 
 interface ProjectDocument {
-  schemaVersion: 1;
-  id: string;
-  ownerId: string;
-  title: string;
+  schemaVersion: 2;
+  id: string; // = projects.id (UUID), ≤ 64
+  ownerId: string; // = users.id, ≤ 64
+  title: string; // trim, 1–120
   type: ProjectType;
   settings: {
     orientation: 'auto' | 'portrait' | 'landscape';
     quality: 'auto' | 'low' | 'medium' | 'high';
   };
-  entrySceneId?: string;
+  entrySceneId: Id | null; // обязателен для game*, null для app без сцен
   scenes: Scene[];
-  pages: AppPage[];
+  pages: AppPage[]; // app: ≥ 1 страница
   graphs: LogicGraph[];
   assetRefs: AssetRef[];
   globalVariables: Record<string, TypedValue>;
 }
 interface Scene {
-  id: string;
+  id: Id;
   name: string;
-  rootEntityIds: string[];
-  entities: Record<string, SceneEntity>;
-}
+  rootEntityIds: Id[];
+  entities: Record<Id, SceneEntity>;
+} // ≤ 5000 entities
 interface SceneEntity {
-  id: string;
+  id: Id;
   name: string;
-  parentId: string | null;
-  childIds: string[];
+  parentId: Id | null;
+  childIds: Id[];
   enabled: boolean;
-  components: ComponentRecord[];
+  components: ComponentRecord[]; // ≤ 32, не более одного компонента каждого type
 }
-interface ComponentRecord {
-  id: string;
-  type: ComponentType;
-  enabled: boolean;
-  data: unknown;
+type ComponentRecord = { id: Id; enabled: boolean } & (
+  | { type: 'transform'; data: { position: Vec3; rotationEuler: Vec3; scale: Vec3 } }
+  | {
+      type: 'mesh';
+      data: {
+        primitive: 'box' | 'sphere' | 'plane' | 'cylinder' | 'capsule' | 'cone';
+        assetId: Id | null;
+      };
+    }
+  | {
+      type: 'material';
+      data: {
+        baseColor: Hex;
+        roughness: number;
+        metalness: number;
+        emissive: Hex;
+        opacity: number;
+      };
+    }
+  | {
+      type: 'camera';
+      data:
+        | { projection: 'perspective'; fov: number; nearClip: number; farClip: number }
+        | { projection: 'orthographic'; orthoHeight: number; nearClip: number; farClip: number };
+    } // farClip > nearClip
+  | {
+      type: 'light';
+      data: {
+        kind: 'directional' | 'point' | 'spot';
+        color: Hex;
+        intensity: number;
+        range: number;
+        castShadows: boolean;
+      };
+    }
+  | {
+      type: 'rigidBody3d';
+      data: {
+        bodyType: 'dynamic' | 'kinematic' | 'static';
+        mass: number;
+        linearDamping: number;
+        angularDamping: number;
+        gravityScale: number;
+      };
+    }
+  | {
+      type: 'collider3d';
+      data: { shape: 'box' | 'sphere' | 'capsule'; size: Vec3; isTrigger: boolean };
+    }
+  | {
+      type: 'sprite';
+      data: {
+        assetId: Id | null;
+        color: Hex;
+        layer: number;
+        sortOrder: number;
+        flipX: boolean;
+        flipY: boolean;
+      };
+    }
+  | {
+      type: 'collider2d';
+      data: { shape: 'box' | 'circle'; size: Vec2; isStatic: boolean; isTrigger: boolean };
+    }
+  | {
+      type: 'audio';
+      data: {
+        assetId: Id | null;
+        volume: number;
+        loop: boolean;
+        autoplay: boolean;
+        spatial: boolean;
+      };
+    }
+  | {
+      type: 'playerController';
+      data: {
+        mode: 'firstPerson' | 'thirdPerson' | 'platformer2d';
+        moveSpeed: number;
+        jumpHeight: number;
+      };
+    }
+  | { type: 'scriptGraph'; data: { graphId: Id } }
+);
+interface AppPage {
+  id: Id;
+  name: string;
+  route: string /* /^\/[a-z0-9\-/]*$/ */;
+  rootComponentId: Id;
+  components: Record<Id, AppComponent>;
 }
+type AppComponent = { id: Id; childIds: Id[] } & (
+  | { type: 'container'; props: { direction: 'column' | 'row'; gap: number; padding: number } }
+  | { type: 'text'; props: { text: string; variant: 'title' | 'subtitle' | 'body' | 'caption' } }
+  | {
+      type: 'button';
+      props: {
+        label: string;
+        variant: 'primary' | 'secondary';
+        action: { kind: 'none' } | { kind: 'navigate'; pageId: Id };
+      };
+    }
+  | { type: 'image'; props: { assetId: Id | null; alt: string; fit: 'cover' | 'contain' } }
+  | { type: 'input'; props: { label: string; placeholder: string; fieldKey: string } }
+);
 interface LogicGraph {
-  id: string;
+  id: Id;
+  name: string;
   nodes: LogicNode[];
   edges: LogicEdge[];
 }
-interface AppPage {
-  id: string;
-  route: string;
-  rootComponentId: string;
-  components: Record<string, AppComponent>;
+interface LogicNode {
+  id: Id;
+  type: string /* 'group.name' */;
+  position: { x: number; y: number };
+  data: Record<string, Json>;
+}
+interface LogicEdge {
+  id: Id;
+  sourceNodeId: Id;
+  sourcePort: string;
+  targetNodeId: Id;
+  targetPort: string;
 }
 interface AssetRef {
-  id: string;
+  id: Id;
   version: string;
   kind: 'model' | 'image' | 'audio' | 'font';
 }
-interface TypedValue {
-  type: 'string' | 'number' | 'boolean' | 'vec2' | 'vec3';
-  value: unknown;
-}
+type TypedValue =
+  | { type: 'string'; value: string }
+  | { type: 'number'; value: number }
+  | { type: 'boolean'; value: boolean }
+  | { type: 'vec2'; value: Vec2 }
+  | { type: 'vec3'; value: Vec3 };
 ```
 
-Реализация использует **discriminated unions + Zod** для каждого компонента и typed node. Не оставляйте `unknown` без последующей проверки. Любые `parentId`, `childIds`, `rootEntityIds` обязаны пройти проверку отсутствия циклов и битых ссылок. `schemaVersion` мигрирует `v1 → v2` через отдельные чистые функции с тестами на сохранение смысла.
+Точные диапазоны чисел и перечисления — в `v2.ts`; при расхождении с этим наброском прав код, а набросок исправляется в том же PR.
+
+**Целостность** (`validateProjectDocument`, после Zod): ключи записей равны `id`; ID уникальны во всём документе; `parentId`/`childIds`/`rootEntityIds` согласованы и без циклов; ссылки на сцену, страницу, граф, узлы и assets существуют и подходят по `kind` (mesh→model, sprite/image→image, audio→audio); маршруты страниц уникальны, корень страницы — container, у листовых виджетов нет детей, у виджета один родитель. Ошибка структуры → `HIERARCHY_CYCLE` (циклы), `GRAPH_BROKEN_REF` (битые ссылки) или `SCHEMA_INVALID` (остальное), именно в этом приоритете.
+
+**Миграции.** Единственная точка входа — `parseProjectDocument(input)`: `migrateToLatest` → Zod v2 → целостность. Цепочка `v1 → v2` — чистая функция (`migrate.ts`), покрытая golden-фикстурами `packages/project-schema/fixtures/`: она заполняет типизированные `data`/`props` значениями по умолчанию, добавляет `name` страницам и графам и `position` узлам и выставляет `entrySceneId`. Схема v1 заморожена (`v1.ts`) и используется только миграцией. Документ новее поддерживаемой версии или невалидный старый документ → `MIGRATION_FAILED`. Сервер мигрирует сохранённый документ при чтении (`GET draft`), а в БД v2 попадает при следующем `PUT draft`. В БД и в API хранится только этот JSON — объекты движка (Three/Pixi, физика) не сериализуются никогда.
 
 **Стабильные IDs**: UUID/ULID генерируются при создании сущности. ID не должен меняться при сохранении, рендере, переподключении или редактировании свойства. 3D-world coordinates в метрах, правосторонняя система координат по правилам выбранного engine adapter; единицы и конверсия документированы.
 

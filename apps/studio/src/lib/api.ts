@@ -6,6 +6,7 @@ import {
   meResponseSchema,
   projectDetailSchema,
   projectDraftResponseSchema,
+  saveDraftResponseSchema,
   userPreferencesSchema,
   type AuthResponse,
   type CreateProjectRequest,
@@ -17,6 +18,8 @@ import {
   type ProjectDetail,
   type ProjectDraftResponse,
   type ProjectTypeDto,
+  type SaveDraftRequest,
+  type SaveDraftResponse,
   type UpdatePreferencesRequest,
   type UserPreferences,
 } from '@tg-creator/shared';
@@ -165,6 +168,8 @@ export function createApiClient(options: ApiClientOptions) {
       request('GET', `/projects/${encodeURIComponent(id)}`, projectDetailSchema),
     getDraft: (id: string): Promise<ProjectDraftResponse> =>
       request('GET', `/projects/${encodeURIComponent(id)}/draft`, projectDraftResponseSchema),
+    saveDraft: (id: string, input: SaveDraftRequest): Promise<SaveDraftResponse> =>
+      request('PUT', `/projects/${encodeURIComponent(id)}/draft`, saveDraftResponseSchema, input),
     duplicateProject: (id: string): Promise<CreateProjectResponse> =>
       request('POST', `/projects/${encodeURIComponent(id)}/duplicate`, createProjectResponseSchema),
     deleteProject: (id: string): Promise<void> =>

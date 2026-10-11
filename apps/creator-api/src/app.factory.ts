@@ -17,7 +17,8 @@ export async function createApp(): Promise<INestApplication> {
   });
   // Railway terminates TLS in front of us; needed for per-IP auth rate limits.
   app.set('trust proxy', 1);
-  app.useBodyParser('json', { limit: '256kb' });
+  // Sized for `PUT draft` (DRAFT_MAX_BYTES + envelope); the service enforces the exact limit.
+  app.useBodyParser('json', { limit: '3mb' });
 
   const config = app.get(ConfigService<Env, true>);
   const corsOrigins = config
@@ -45,6 +46,7 @@ export async function createApp(): Promise<INestApplication> {
     },
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: ['Authorization', 'Content-Type'],
+    exposedHeaders: ['ETag'],
   });
 
   return app;

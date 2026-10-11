@@ -7,7 +7,7 @@ import {
   createProjectDocument,
   type ProjectTemplateId,
 } from './templates.js';
-import type { ProjectDocument, ProjectType } from './v1.js';
+import type { ProjectDocument, ProjectType } from './v2.js';
 
 const TYPES: ProjectType[] = ['game3d', 'game2d', 'app'];
 
@@ -25,9 +25,9 @@ function make(type: ProjectType, templateId: ProjectTemplateId): ProjectDocument
 describe('createProjectDocument', () => {
   for (const type of TYPES) {
     for (const templateId of PROJECT_TEMPLATE_IDS) {
-      it(`${type}/${templateId} is a valid, roundtrippable v1 document`, () => {
+      it(`${type}/${templateId} is a valid, roundtrippable v2 document`, () => {
         const document = make(type, templateId);
-        expect(document.schemaVersion).toBe(1);
+        expect(document.schemaVersion).toBe(2);
         expect(document.type).toBe(type);
         expect(document.settings.orientation).toBe('portrait');
         expect(deserializeProjectDocument(serializeProjectDocument(document))).toEqual(document);

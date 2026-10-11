@@ -58,6 +58,40 @@ describe('createApiClient', () => {
     await expect(proxy.me()).rejects.toMatchObject({ code: null, status: 502 });
   });
 
+  it('saves a draft with baseRevision and surfaces 409 conflict details', async () => {
+    const saved = {
+      projectId: 'p1',
+      revision: 2,
+      etag: '"rev-2"',
+      savedAt: '2026-10-11T12:00:00.000Z',
+    };
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse(200, saved))
+      .mockResolvedValueOnce(
+        jsonResponse(409, {
+          error: {
+            code: 'REVISION_CONFLICT',
+            message: 'Черновик изменён в другом месте',
+            details: { expectedRevision: 1, actualRevision: 2 },
+          },
+        }),
+      );
+    const api = createApiClient({ baseUrl: 'http://api', getToken: () => 'tgc_x', fetchImpl });
+    const input = { baseRevision: 1, mutationId: 'mut_00000001', document: { any: 'thing' } };
+    await expect(api.saveDraft('p1', input)).resolves.toEqual(saved);
+    const [url, init] = fetchImpl.mock.calls[0] ?? [];
+    expect(url).toBe('http://api/api/v1/projects/p1/draft');
+    expect(init?.method).toBe('PUT');
+    expect(JSON.parse(String(init?.body))).toEqual(input);
+
+    await expect(api.saveDraft('p1', input)).rejects.toMatchObject({
+      code: 'REVISION_CONFLICT',
+      status: 409,
+      details: { expectedRevision: 1, actualRevision: 2 },
+    });
+  });
+
   it('rejects responses that do not match the contract', async () => {
     const api = createApiClient({
       baseUrl: 'http://api',

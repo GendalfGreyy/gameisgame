@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 2,
+  "id": "00000000-0000-4000-8000-000000000001",
+  "ownerId": "00000000-0000-4000-8000-0000000000aa",
+  "title": "Фикстура app",
+  "type": "app",
+  "settings": {
+    "orientation": "auto",
+    "quality": "auto"
+  },
+  "entrySceneId": null,
+  "scenes": [],
+  "pages": [
+    {
+      "id": "page_home",
+      "name": "Главная",
+      "route": "/",
+      "rootComponentId": "cmp_root",
+      "components": {
+        "cmp_root": {
+          "id": "cmp_root",
+          "type": "container",
+          "props": {
+            "direction": "column",
+            "gap": 12,
+            "padding": 16
+          },
+          "childIds": ["cmp_title", "cmp_text", "cmp_button"]
+        },
+        "cmp_title": {
+          "id": "cmp_title",
+          "type": "text",
+          "props": {
+            "text": "Фикстура app",
+            "variant": "title"
+          },
+          "childIds": []
+        },
+        "cmp_text": {
+          "id": "cmp_text",
+          "type": "text",
+          "props": {
+            "text": "Опишите, что умеет ваше приложение.",
+            "variant": "body"
+          },
+          "childIds": []
+        },
+        "cmp_button": {
+          "id": "cmp_button",
+          "type": "button",
+          "props": {
+            "label": "Начать",
+            "variant": "primary",
+            "action": {
+              "kind": "none"
+            }
+          },
+          "childIds": []
+        }
+      }
+    }
+  ],
+  "graphs": [],
+  "assetRefs": [],
+  "globalVariables": {}
+}

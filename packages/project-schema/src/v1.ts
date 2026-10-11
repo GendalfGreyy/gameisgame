@@ -1,12 +1,15 @@
 import { z } from 'zod';
 
-/** Current ProjectDocument schema version shipped in G0. */
-export const PROJECT_SCHEMA_VERSION = 1 as const;
+/**
+ * Frozen ProjectDocument v1 (G0–G1). Only `migrate.ts` reads it; never extend this file —
+ * new fields go into the latest version plus a migration step.
+ */
+export const PROJECT_SCHEMA_VERSION_V1 = 1 as const;
 
-export const projectTypeSchema = z.enum(['game3d', 'game2d', 'app']);
-export type ProjectType = z.infer<typeof projectTypeSchema>;
+export const projectTypeV1Schema = z.enum(['game3d', 'game2d', 'app']);
+export type ProjectTypeV1 = z.infer<typeof projectTypeV1Schema>;
 
-export const componentTypeSchema = z.enum([
+export const componentTypeV1Schema = z.enum([
   'transform',
   'mesh',
   'material',
@@ -20,107 +23,110 @@ export const componentTypeSchema = z.enum([
   'playerController',
   'scriptGraph',
 ]);
-export type ComponentType = z.infer<typeof componentTypeSchema>;
+export type ComponentTypeV1 = z.infer<typeof componentTypeV1Schema>;
 
-export const vec3Schema = z.tuple([z.number().finite(), z.number().finite(), z.number().finite()]);
+export const vec3V1Schema = z.tuple([
+  z.number().finite(),
+  z.number().finite(),
+  z.number().finite(),
+]);
 
-export const componentRecordSchema = z.object({
+export const componentRecordV1Schema = z.object({
   id: z.string().min(1),
-  type: componentTypeSchema,
+  type: componentTypeV1Schema,
   enabled: z.boolean(),
   data: z.record(z.unknown()),
 });
-export type ComponentRecord = z.infer<typeof componentRecordSchema>;
+export type ComponentRecordV1 = z.infer<typeof componentRecordV1Schema>;
 
-export const sceneEntitySchema = z.object({
+export const sceneEntityV1Schema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   parentId: z.string().min(1).nullable(),
   childIds: z.array(z.string().min(1)),
   enabled: z.boolean(),
-  components: z.array(componentRecordSchema),
+  components: z.array(componentRecordV1Schema),
 });
-export type SceneEntity = z.infer<typeof sceneEntitySchema>;
+export type SceneEntityV1 = z.infer<typeof sceneEntityV1Schema>;
 
-export const sceneSchema = z.object({
+export const sceneV1Schema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   rootEntityIds: z.array(z.string().min(1)),
-  entities: z.record(sceneEntitySchema),
+  entities: z.record(sceneEntityV1Schema),
 });
-export type Scene = z.infer<typeof sceneSchema>;
+export type SceneV1 = z.infer<typeof sceneV1Schema>;
 
-export const appComponentSchema = z.object({
+export const appComponentV1Schema = z.object({
   id: z.string().min(1),
   type: z.string().min(1),
   props: z.record(z.unknown()).default({}),
   childIds: z.array(z.string().min(1)).default([]),
 });
-export type AppComponent = z.infer<typeof appComponentSchema>;
+export type AppComponentV1 = z.infer<typeof appComponentV1Schema>;
 
-export const appPageSchema = z.object({
+export const appPageV1Schema = z.object({
   id: z.string().min(1),
   route: z.string().min(1),
   rootComponentId: z.string().min(1),
-  components: z.record(appComponentSchema),
+  components: z.record(appComponentV1Schema),
 });
-export type AppPage = z.infer<typeof appPageSchema>;
+export type AppPageV1 = z.infer<typeof appPageV1Schema>;
 
-export const logicNodeSchema = z.object({
+export const logicNodeV1Schema = z.object({
   id: z.string().min(1),
   type: z.string().min(1),
   data: z.record(z.unknown()).default({}),
 });
-export type LogicNode = z.infer<typeof logicNodeSchema>;
+export type LogicNodeV1 = z.infer<typeof logicNodeV1Schema>;
 
-export const logicEdgeSchema = z.object({
+export const logicEdgeV1Schema = z.object({
   id: z.string().min(1),
   sourceNodeId: z.string().min(1),
   sourcePort: z.string().min(1),
   targetNodeId: z.string().min(1),
   targetPort: z.string().min(1),
 });
-export type LogicEdge = z.infer<typeof logicEdgeSchema>;
+export type LogicEdgeV1 = z.infer<typeof logicEdgeV1Schema>;
 
-export const logicGraphSchema = z.object({
+export const logicGraphV1Schema = z.object({
   id: z.string().min(1),
-  nodes: z.array(logicNodeSchema),
-  edges: z.array(logicEdgeSchema),
+  nodes: z.array(logicNodeV1Schema),
+  edges: z.array(logicEdgeV1Schema),
 });
-export type LogicGraph = z.infer<typeof logicGraphSchema>;
+export type LogicGraphV1 = z.infer<typeof logicGraphV1Schema>;
 
-export const assetRefSchema = z.object({
+export const assetRefV1Schema = z.object({
   id: z.string().min(1),
   version: z.string().min(1),
   kind: z.enum(['model', 'image', 'audio', 'font']),
 });
-export type AssetRef = z.infer<typeof assetRefSchema>;
+export type AssetRefV1 = z.infer<typeof assetRefV1Schema>;
 
-export const typedValueSchema = z.object({
+export const typedValueV1Schema = z.object({
   type: z.enum(['string', 'number', 'boolean', 'vec2', 'vec3']),
   value: z.unknown(),
 });
-export type TypedValue = z.infer<typeof typedValueSchema>;
+export type TypedValueV1 = z.infer<typeof typedValueV1Schema>;
 
-export const projectSettingsSchema = z.object({
+export const projectSettingsV1Schema = z.object({
   orientation: z.enum(['auto', 'portrait', 'landscape']),
   quality: z.enum(['auto', 'low', 'medium', 'high']),
 });
 
 export const projectDocumentV1Schema = z.object({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION_V1),
   id: z.string().min(1),
   ownerId: z.string().min(1),
   title: z.string().min(1).max(120),
-  type: projectTypeSchema,
-  settings: projectSettingsSchema,
+  type: projectTypeV1Schema,
+  settings: projectSettingsV1Schema,
   entrySceneId: z.string().min(1).optional(),
-  scenes: z.array(sceneSchema),
-  pages: z.array(appPageSchema),
-  graphs: z.array(logicGraphSchema),
-  assetRefs: z.array(assetRefSchema),
-  globalVariables: z.record(typedValueSchema),
+  scenes: z.array(sceneV1Schema),
+  pages: z.array(appPageV1Schema),
+  graphs: z.array(logicGraphV1Schema),
+  assetRefs: z.array(assetRefV1Schema),
+  globalVariables: z.record(typedValueV1Schema),
 });
 
 export type ProjectDocumentV1 = z.infer<typeof projectDocumentV1Schema>;
-export type ProjectDocument = ProjectDocumentV1;

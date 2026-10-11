@@ -79,8 +79,29 @@ model Project {
   updatedAt DateTime      @updatedAt @map("updated_at")
   deletedAt DateTime?     @map("deleted_at")
 
-  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner     User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  mutations DraftMutation[]
 
   @@index([ownerId, deletedAt, updatedAt(sort: Desc), id(sort: Desc)])
   @@map("projects")
+}
+
+/// Idempotency journal for `PUT /projects/:id/draft` (docs/04 §3): a replayed
+/// `mutationId` returns the stored result instead of writing twice. Lives in Postgres,
+/// not a TTL cache, so a retry after a server restart is still safe.
+model DraftMutation {
+  projectId    String   @map("project_id") @db.Uuid
+  mutationId   String   @map("mutation_id")
+  baseRevision Int      @map("base_revision")
+  /// SHA-256 of the canonical serialized document that was saved.
+  documentHash String   @map("document_hash")
+  revision     Int
+  savedAt      DateTime @map("saved_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, mutationId])
+  @@index([projectId, createdAt])
+  @@map("draft_mutations")
 }

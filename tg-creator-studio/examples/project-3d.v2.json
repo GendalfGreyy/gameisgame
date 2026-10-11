@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 2,
+  "id": "project_example_3d",
+  "ownerId": "user_example",
+  "title": "Мой первый 3D-мир",
+  "type": "game3d",
+  "settings": { "orientation": "auto", "quality": "auto" },
+  "entrySceneId": "scene_main",
+  "scenes": [
+    {
+      "id": "scene_main",
+      "name": "Main Scene",
+      "rootEntityIds": [
+        "entity_ground",
+        "entity_cube",
+        "entity_player",
+        "entity_light",
+        "entity_camera"
+      ],
+      "entities": {
+        "entity_ground": {
+          "id": "entity_ground",
+          "name": "Ground",
+          "parentId": null,
+          "childIds": [],
+          "enabled": true,
+          "components": [
+            {
+              "id": "cmp_transform_ground",
+              "type": "transform",
+              "enabled": true,
+              "data": { "position": [0, 0, 0], "rotationEuler": [0, 0, 0], "scale": [20, 1, 20] }
+            },
+            {
+              "id": "cmp_mesh_ground",
+              "type": "mesh",
+              "enabled": true,
+              "data": { "primitive": "plane", "assetId": null }
+            },
+            {
+              "id": "cmp_material_ground",
+              "type": "material",
+              "enabled": true,
+              "data": {
+                "baseColor": "#3B3A33",
+                "roughness": 0.9,
+                "metalness": 0,
+                "emissive": "#000000",
+                "opacity": 1
+              }
+            },
+            {
+              "id": "cmp_body_ground",
+              "type": "rigidBody3d",
+              "enabled": true,
+              "data": {
+                "bodyType": "static",
+                "mass": 1,
+                "linearDamping": 0,
+                "angularDamping": 0,
+                "gravityScale": 1
+              }
+            },
+            {
+              "id": "cmp_collider_ground",
+              "type": "collider3d",
+              "enabled": true,
+              "data": { "shape": "box", "size": [20, 0.1, 20], "isTrigger": false }
+            }
+          ]
+        },
+        "entity_cube": {
+          "id": "entity_cube",
+          "name": "Cube",
+          "parentId": null,
+          "childIds": ["entity_cube_gem"],
+          "enabled": true,
+          "components": [
+            {
+              "id": "cmp_transform_cube",
+              "type": "transform",
+              "enabled": true,
+              "data": { "position": [0, 1, 0], "rotationEuler": [0, 0, 0], "scale": [1, 1, 1] }
+            },
+            {
+              "id": "cmp_mesh_cube",
+              "type": "mesh",
+              "enabled": true,
+              "data": { "primitive": "box", "assetId": null }
+            },
+            {
+              "id": "cmp_material_cube",
+              "type": "material",
+              "enabled": true,
+              "data": {
+                "baseColor": "#8175F5",
+                "roughness": 0.7,
+                "metalness": 0,
+                "emissive": "#000000",
+                "opacity": 1
+              }
+            },
+            {
+              "id": "cmp_script_cube",
+              "type": "scriptGraph",
+              "enabled": true,
+              "data": { "graphId": "graph_cube_spin" }
+            }
+          ]
+        },
+        "entity_cube_gem": {
+          "id": "entity_cube_gem",
+          "name": "Gem",
+          "parentId": "entity_cube",
+          "childIds": [],
+          "enabled": true,
+          "components": [
+            {
+              "id": "cmp_transform_gem",
+              "type": "transform",
+              "enabled": true,
+              "data": {
+                "position": [0, 0.9, 0],
+                "rotationEuler": [45, 0, 45],
+                "scale": [0.3, 0.3, 0.3]
+              }
+            },
+            {
+              "id": "cmp_mesh_gem",
+              "type": "mesh",
+              "enabled": true,
+              "data": { "primitive": "box", "assetId": null }
+            },
+            {
+              "id": "cmp_material_gem",
+              "type": "material",
+              "enabled": true,
+              "data": {
+                "baseColor": "#D4F24A",
+                "roughness": 0.2,
+                "metalness": 0.4,
+                "emissive": "#3B4A10",
+                "opacity": 1
+              }
+            }
+          ]
+        },
+        "entity_player": {
+          "id": "entity_player",
+          "name": "Player",
+          "parentId": null,
+          "childIds": [],
+          "enabled": true,
+          "components": [
+            {
+              "id": "cmp_transform_player",
+              "type": "transform",
+              "enabled": true,
+              "data": { "position": [-3, 1, 3], "rotationEuler": [0, 0, 0], "scale": [1, 1, 1] }
+            },
+            {
+              "id": "cmp_mesh_player",
+              "type": "mesh",
+              "enabled": true,
+              "data": { "primitive": "capsule", "assetId": null }
+            },
+            {
+              "id": "cmp_controller_player",
+              "type": "playerController",
+              "enabled": true,
+              "data": { "mode": "thirdPerson", "moveSpeed": 5, "jumpHeight": 1.2 }
+            }
+          ]
+        },
+        "entity_light": {
+          "id": "entity_light",
+          "name": "Sun",
+          "parentId": null,
+          "childIds": [],
+          "enabled": true,
+          "components": [
+            {
+              "id": "cmp_transform_light",
+              "type": "transform",
+              "enabled": true,
+              "data": { "position": [0, 10, 0], "rotationEuler": [-50, 30, 0], "scale": [1, 1, 1] }
+            },
+            {
+              "id": "cmp_light",
+              "type": "light",
+              "enabled": true,
+              "data": {
+                "kind": "directional",
+                "color": "#FFFFFF",
+                "intensity": 1,
+                "range": 10,
+                "castShadows": true
+              }
+            }
+          ]
+        },
+        "entity_camera": {
+          "id": "entity_camera",
+          "name": "Camera",
+          "parentId": null,
+          "childIds": [],
+          "enabled": true,
+          "components": [
+            {
+              "id": "cmp_transform_camera",
+              "type": "transform",
+              "enabled": true,
+              "data": { "position": [5, 4, 6], "rotationEuler": [-20, 35, 0], "scale": [1, 1, 1] }
+            },
+            {
+              "id": "cmp_camera",
+              "type": "camera",
+              "enabled": true,
+              "data": { "projection": "perspective", "fov": 60, "nearClip": 0.1, "farClip": 1000 }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "pages": [],
+  "graphs": [
+    {
+      "id": "graph_cube_spin",
+      "name": "Вращение куба",
+      "nodes": [
+        {
+          "id": "node_update",
+          "type": "event.onUpdate",
+          "position": { "x": 0, "y": 0 },
+          "data": {}
+        },
+        {
+          "id": "node_rotate",
+          "type": "transform.rotate",
+          "position": { "x": 240, "y": 0 },
+          "data": { "axis": "y", "degreesPerSecond": 45 }
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_update_rotate",
+          "sourceNodeId": "node_update",
+          "sourcePort": "exec",
+          "targetNodeId": "node_rotate",
+          "targetPort": "exec"
+        }
+      ]
+    }
+  ],
+  "assetRefs": [],
+  "globalVariables": {
+    "score": { "type": "number", "value": 0 },
+    "spawnPoint": { "type": "vec3", "value": [-3, 1, 3] }
+  }
+}

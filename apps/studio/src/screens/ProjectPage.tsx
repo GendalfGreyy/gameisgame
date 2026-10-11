@@ -1,4 +1,4 @@
-import { migrateToLatest, type ProjectDocument } from '@tg-creator/project-schema';
+import { parseProjectDocument, type ProjectDocument } from '@tg-creator/project-schema';
 import type { ProjectDetail } from '@tg-creator/shared';
 import { useEffect, useState } from 'react';
 
@@ -84,9 +84,9 @@ export function ProjectPage({ projectId }: { projectId: string }) {
         if (cancelled) {
           return;
         }
-        const migrated = migrateToLatest(draft.document);
+        const parsed = parseProjectDocument(draft.document);
         writeStored(STORAGE_KEYS.lastProject, project.id);
-        setState({ status: 'ready', project, document: migrated.ok ? migrated.document : null });
+        setState({ status: 'ready', project, document: parsed.ok ? parsed.document : null });
       })
       .catch((error: unknown) => {
         if (!cancelled) {
