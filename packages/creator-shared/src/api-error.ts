@@ -74,6 +74,7 @@ export function defaultStatusForCode(code: ErrorCode): number {
     case 'ASSET_MISSING':
     case 'PUBLISH_VALIDATION_FAILED':
     case 'PUBLISH_LINK_NOT_CONFIGURED':
+    case 'VALIDATION_FAILED':
       return 422;
     case 'QUOTA_EXCEEDED':
     case 'RATE_LIMITED':
