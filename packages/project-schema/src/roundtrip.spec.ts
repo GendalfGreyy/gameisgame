@@ -1,39 +1,93 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import { describe, expect, it } from 'vitest';
 
-import { migrateToLatest } from './migrate.js';
+import { parseProjectDocument } from './parse.js';
 import { deserializeProjectDocument, serializeProjectDocument } from './serialize.js';
-import { projectDocumentV1Schema } from './v1.js';
+import { PROJECT_TEMPLATE_IDS, createProjectDocument } from './templates.js';
+import { clone, readExample } from './testing.js';
+import { projectDocumentSchema, type ProjectDocument, type ProjectType } from './v2.js';
 
-const examplePath = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../tg-creator-studio/examples/project-3d.v1.json',
-);
+function example(): ProjectDocument {
+  return projectDocumentSchema.parse(readExample('project-3d.v2.json'));
+}
 
-describe('@tg-creator/project-schema', () => {
-  it('parses the canonical 3D example', () => {
-    const raw = JSON.parse(readFileSync(examplePath, 'utf8')) as unknown;
-    const parsed = projectDocumentV1Schema.parse(raw);
-    expect(parsed.schemaVersion).toBe(1);
-    expect(parsed.type).toBe('game3d');
-    expect(parsed.scenes[0]?.entities['entity_cube']?.components.length).toBeGreaterThan(0);
-  });
-
-  it('roundtrips serialize → deserialize without data loss', () => {
-    const raw = JSON.parse(readFileSync(examplePath, 'utf8')) as unknown;
-    const document = projectDocumentV1Schema.parse(raw);
-    const again = deserializeProjectDocument(serializeProjectDocument(document));
-    expect(again).toEqual(document);
-  });
-
-  it('rejects unsupported schemaVersion via migrateToLatest', () => {
-    const result = migrateToLatest({ schemaVersion: 99, id: 'x' });
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.reason).toBe('unsupported_version');
+describe('ProjectDocument v2 roundtrip', () => {
+  it('the canonical v2 example is valid and consistent', () => {
+    const parsed = parseProjectDocument(readExample('project-3d.v2.json'));
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) {
+      expect(parsed.migratedFrom).toBeNull();
+      expect(parsed.document.scenes[0]?.entities['entity_cube_gem']?.parentId).toBe('entity_cube');
     }
+  });
+
+  it('serialize → deserialize → serialize is byte-identical and lossless', () => {
+    const document = example();
+    const first = serializeProjectDocument(document);
+    const restored = deserializeProjectDocument(first);
+    expect(restored).toEqual(document);
+    expect(serializeProjectDocument(restored)).toBe(first);
+  });
+
+  it('serialization is canonical regardless of input key order', () => {
+    const document = example();
+    const reordered = Object.fromEntries(Object.entries(document).reverse());
+    expect(serializeProjectDocument(projectDocumentSchema.parse(reordered))).toBe(
+      serializeProjectDocument(document),
+    );
+  });
+
+  for (const type of ['game3d', 'game2d', 'app'] satisfies ProjectType[]) {
+    for (const templateId of PROJECT_TEMPLATE_IDS) {
+      it(`template ${type}/${templateId} roundtrips`, () => {
+        const document = createProjectDocument({
+          id: 'prj_1',
+          ownerId: 'usr_1',
+          title: 'Тест',
+          type,
+          templateId,
+          orientation: 'auto',
+        });
+        const raw = serializeProjectDocument(document);
+        expect(serializeProjectDocument(deserializeProjectDocument(raw))).toBe(raw);
+      });
+    }
+  }
+
+  it('rejects unknown fields instead of silently dropping them', () => {
+    const document: Record<string, unknown> = { ...clone(example()), engineState: { gl: 1 } };
+    const parsed = parseProjectDocument(document);
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) {
+      expect(parsed.code).toBe('SCHEMA_INVALID');
+    }
+  });
+
+  it('rejects untyped component data', () => {
+    const document = clone(example());
+    const cube = document.scenes[0]?.entities['entity_cube'];
+    const material = cube?.components.find((component) => component.type === 'material');
+    if (material?.type !== 'material') {
+      throw new Error('fixture has no material');
+    }
+    const broken: unknown = { ...document };
+    Reflect.set(material.data, 'roughness', 'very');
+    const parsed = parseProjectDocument(broken);
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) {
+      expect(parsed.code).toBe('SCHEMA_INVALID');
+      expect(parsed.issues[0]?.path).toContain('roughness');
+    }
+  });
+
+  it('rejects a camera whose far clip is not beyond the near clip', () => {
+    const document = clone(example());
+    const camera = document.scenes[0]?.entities['entity_camera']?.components.find(
+      (component) => component.type === 'camera',
+    );
+    if (camera?.type !== 'camera') {
+      throw new Error('fixture has no camera');
+    }
+    camera.data.farClip = 0.05;
+    expect(parseProjectDocument(document).ok).toBe(false);
   });
 });

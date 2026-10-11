@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 2,
+  "id": "00000000-0000-4000-8000-000000000001",
+  "ownerId": "00000000-0000-4000-8000-0000000000aa",
+  "title": "Фикстура app",
+  "type": "app",
+  "settings": {
+    "orientation": "auto",
+    "quality": "auto"
+  },
+  "entrySceneId": null,
+  "scenes": [],
+  "pages": [
+    {
+      "id": "page_home",
+      "name": "Главная",
+      "route": "/",
+      "rootComponentId": "cmp_root",
+      "components": {
+        "cmp_root": {
+          "id": "cmp_root",
+          "type": "container",
+          "props": {
+            "direction": "column",
+            "gap": 12,
+            "padding": 16
+          },
+          "childIds": []
+        }
+      }
+    }
+  ],
+  "graphs": [],
+  "assetRefs": [],
+  "globalVariables": {}
+}

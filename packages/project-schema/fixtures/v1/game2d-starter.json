@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "id": "00000000-0000-4000-8000-000000000001",
+  "ownerId": "00000000-0000-4000-8000-0000000000aa",
+  "title": "Фикстура game2d",
+  "type": "game2d",
+  "settings": {
+    "orientation": "auto",
+    "quality": "auto"
+  },
+  "entrySceneId": "scene_main",
+  "scenes": [
+    {
+      "id": "scene_main",
+      "name": "Основная сцена",
+      "rootEntityIds": ["entity_camera", "entity_ground", "entity_player"],
+      "entities": {
+        "entity_camera": {
+          "id": "entity_camera",
+          "name": "Камера",
+          "parentId": null,
+          "childIds": [],
+          "enabled": true,
+          "components": [
+            {
+              "id": "cmp_transform_camera",
+              "type": "transform",
+              "enabled": true,
+              "data": {
+                "position": [0, 0, 10],
+                "rotationEuler": [0, 0, 0],
+                "scale": [1, 1, 1]
+              }
+            },
+            {
+              "id": "cmp_camera",
+              "type": "camera",
+              "enabled": true,
+              "data": {
+                "projection": "orthographic",
+                "orthoHeight": 10
+              }
+            }
+          ]
+        },
+        "entity_ground": {
+          "id": "entity_ground",
+          "name": "Платформа",
+          "parentId": null,
+          "childIds": [],
+          "enabled": true,
+          "components": [
+            {
+              "id": "cmp_transform_ground",
+              "type": "transform",
+              "enabled": true,
+              "data": {
+                "position": [0, -4, 0],
+                "rotationEuler": [0, 0, 0],
+                "scale": [16, 1, 1]
+              }
+            },
+            {
+              "id": "cmp_sprite_ground",
+              "type": "sprite",
+              "enabled": true,
+              "data": {
+                "color": "#3A4560",
+                "layer": 0,
+                "sortOrder": 0
+              }
+            },
+            {
+              "id": "cmp_collider_ground",
+              "type": "collider2d",
+              "enabled": true,
+              "data": {
+                "shape": "box",
+                "isStatic": true
+              }
+            }
+          ]
+        },
+        "entity_player": {
+          "id": "entity_player",
+          "name": "Игрок",
+          "parentId": null,
+          "childIds": [],
+          "enabled": true,
+          "components": [
+            {
+              "id": "cmp_transform_player",
+              "type": "transform",
+              "enabled": true,
+              "data": {
+                "position": [0, 0, 0],
+                "rotationEuler": [0, 0, 0],
+                "scale": [1, 1, 1]
+              }
+            },
+            {
+              "id": "cmp_sprite_player",
+              "type": "sprite",
+              "enabled": true,
+              "data": {
+                "color": "#8175F5",
+                "layer": 0,
+                "sortOrder": 1
+              }
+            },
+            {
+              "id": "cmp_collider_player",
+              "type": "collider2d",
+              "enabled": true,
+              "data": {
+                "shape": "box",
+                "isStatic": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "pages": [],
+  "graphs": [],
+  "assetRefs": [],
+  "globalVariables": {}
+}
