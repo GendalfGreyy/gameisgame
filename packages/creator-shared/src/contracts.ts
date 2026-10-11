@@ -138,10 +138,49 @@ export type CreateProjectResponse = z.infer<typeof createProjectResponseSchema>;
 export const projectDetailSchema = projectSummarySchema;
 export type ProjectDetail = z.infer<typeof projectDetailSchema>;
 
+/** Serialized ProjectDocument limit for `PUT draft` (UTF-8 bytes of canonical JSON). */
+export const DRAFT_MAX_BYTES = 2 * 1024 * 1024;
+
+/** `"rev-<n>"` — strong ETag of a draft revision (docs/04 §3). */
+export function draftEtag(revision: number): string {
+  return `"rev-${revision}"`;
+}
+
 /** `document` is a ProjectDocument; callers validate it with @tg-creator/project-schema. */
 export const projectDraftResponseSchema = z.object({
   projectId: z.string().min(1),
   revision: z.number().int().positive(),
+  etag: z.string().min(1),
+  savedAt: z.string().datetime(),
   document: z.unknown(),
 });
 export type ProjectDraftResponse = z.infer<typeof projectDraftResponseSchema>;
+
+/** Idempotency key chosen by the client per logical save (UUID recommended). */
+export const mutationIdSchema = z
+  .string()
+  .min(8)
+  .max(100)
+  .regex(/^[A-Za-z0-9_-]+$/, 'mutationId: латиница, цифры, «_» и «-»');
+
+/** `document` is validated by @tg-creator/project-schema on the server, not by this schema. */
+export const saveDraftRequestSchema = z.object({
+  baseRevision: z.number().int().positive(),
+  mutationId: mutationIdSchema,
+  document: z.unknown().refine((value) => value !== undefined, 'Нужен document'),
+});
+export type SaveDraftRequest = z.infer<typeof saveDraftRequestSchema>;
+
+export const saveDraftResponseSchema = z.object({
+  projectId: z.string().min(1),
+  revision: z.number().int().positive(),
+  etag: z.string().min(1),
+  savedAt: z.string().datetime(),
+});
+export type SaveDraftResponse = z.infer<typeof saveDraftResponseSchema>;
+
+/** `details` of REVISION_CONFLICT (docs/04 §3). */
+export const revisionConflictDetailsSchema = z.object({
+  expectedRevision: z.number().int(),
+  actualRevision: z.number().int(),
+});

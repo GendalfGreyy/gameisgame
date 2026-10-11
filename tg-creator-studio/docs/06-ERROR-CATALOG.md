@@ -22,15 +22,17 @@
 | `QUOTA_EXCEEDED` | Превышена квота проектов/хранилища/публикаций       |
 | `RATE_LIMITED`   | Rate limit per user/project/player                  |
 
-## Документ и ревизии (409/422)
+## Документ и ревизии (409/413/422)
 
-| Код                 | Когда                                            |
-| ------------------- | ------------------------------------------------ |
-| `REVISION_CONFLICT` | `baseRevision` не совпал с серверным             |
-| `SCHEMA_INVALID`    | Документ не прошёл Zod-схему                     |
-| `GRAPH_BROKEN_REF`  | Ссылка на несуществующий node/entity/variable    |
-| `HIERARCHY_CYCLE`   | parentId образует цикл                           |
-| `MIGRATION_FAILED`  | Документ устаревшей schemaVersion не мигрируется |
+| Код                  | Когда                                                                                     |
+| -------------------- | ----------------------------------------------------------------------------------------- |
+| `REVISION_CONFLICT`  | `baseRevision` не совпал с серверным                                                      |
+| `SCHEMA_INVALID`     | Документ не прошёл Zod-схему                                                              |
+| `GRAPH_BROKEN_REF`   | Ссылка на несуществующий node/entity/variable                                             |
+| `HIERARCHY_CYCLE`    | parentId образует цикл                                                                    |
+| `MIGRATION_FAILED`   | Документ устаревшей schemaVersion не мигрируется или его schemaVersion новее сервера      |
+| `MUTATION_ID_REUSED` | Тот же `mutationId` уже применён к этому проекту с другим документом/`baseRevision` (409) |
+| `DOCUMENT_TOO_LARGE` | Тело запроса или сериализованный документ больше лимита черновика (413)                   |
 
 ## Assets (413/422)
 

@@ -61,9 +61,11 @@ export function defaultStatusForCode(code: ErrorCode): number {
     case 'NOT_FOUND':
       return 404;
     case 'REVISION_CONFLICT':
+    case 'MUTATION_ID_REUSED':
     case 'ALREADY_UNPUBLISHED':
       return 409;
     case 'ASSET_TOO_LARGE':
+    case 'DOCUMENT_TOO_LARGE':
       return 413;
     case 'SCHEMA_INVALID':
     case 'GRAPH_BROKEN_REF':
