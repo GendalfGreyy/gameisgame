@@ -29,29 +29,30 @@
 
 ## G1 Auth + Dashboard
 
-| Item                                                                  | Status    | Notes                                                            |
-| --------------------------------------------------------------------- | --------- | ---------------------------------------------------------------- |
-| `verifyTelegramInitData` (HMAC, auth_date, timing-safe, dup keys)     | Completed | test vector посчитан независимо (Python)                         |
-| Sessions: opaque bearer, SHA-256 at rest, logout, TTL                 | Completed | `CREATOR_SESSION_TTL_HOURS` (168)                                |
-| Default-deny `SessionGuard` + `@Public()` (health, auth)              | Completed |                                                                  |
-| Dev-auth hard block                                                   | Completed | `AUTH_DEV_FORBIDDEN`; boot fails if enabled in production        |
-| Global `ApiExceptionFilter` → `{error:{code,message,details}}`        | Completed | только коды docs/06; `VALIDATION_FAILED` добавлен в каталог      |
-| Prisma `User`, `Session`, `Project` (schema `creator`)                | Completed | миграция `20261011173617_g1_auth_projects`                       |
-| `GET /me`, `PATCH /me/preferences`                                    | Completed | тема + плотность per user                                        |
-| Projects list (keyset, type, q) / create / get / draft / dup / delete | Completed | чужой проект = `NOT_FOUND`; квота `QUOTA_EXCEEDED`               |
-| Auth rate limit                                                       | Partial   | in-memory per instance (Redis — G11)                             |
-| `@tg-creator/telegram` bridge + browser fallback                      | Completed | initData, theme, viewport, safe areas, BackButton, header colors |
-| `@tg-creator/ui-kit` theme engine                                     | Completed | Telegram/system/dark/light, WCAG-контраст, fallback палитры      |
-| project-schema templates (`empty`/`starter` × 3 типа) + clone         | Completed | схема v1 без изменений                                           |
-| Studio S01 (loader/auth/errors/dev-login)                             | Completed |                                                                  |
-| Studio S02 dashboard (search, filter, skeleton/empty/error, actions)  | Completed | «Продолжить» последний проект                                    |
-| Studio S03 wizard (type → template → name/orientation)                | Completed | modal ≥768, fullscreen на телефоне                               |
-| Studio project page                                                   | Partial   | реальная структура черновика; редактор — Planned (G3–G4)         |
-| Studio S18 Settings: тема, плотность, аккаунт, выход                  | Completed | privacy/render/team — в соответствующих gates                    |
-| Navigation: sidebar ≥768 / bottom nav <768, Telegram BackButton       | Completed |                                                                  |
-| Tests: unit, int (Postgres), Playwright e2e desktop + mobile          | Completed | CI job `creator-integration`                                     |
-| Railway: `creator-api` + `creator-studio` (cozy-youthfulness)         | Completed | schema `creator` в postgis; меню бота → creator-studio           |
-| Real-device check inside Telegram clients                             | Partial   | агент не открывает клиенты Telegram; нужна ручная проверка (G10) |
+| Item                                                                     | Status    | Notes                                                            |
+| ------------------------------------------------------------------------ | --------- | ---------------------------------------------------------------- |
+| `verifyTelegramInitData` (HMAC, auth_date, timing-safe, dup keys)        | Completed | test vector посчитан независимо (Python)                         |
+| Sessions: opaque bearer, SHA-256 at rest, logout, TTL                    | Completed | `CREATOR_SESSION_TTL_HOURS` (168)                                |
+| Default-deny `SessionGuard` + `@Public()` (health, auth)                 | Completed |                                                                  |
+| Dev-auth hard block                                                      | Completed | `AUTH_DEV_FORBIDDEN`; boot fails if enabled in production        |
+| Global `ApiExceptionFilter` → `{error:{code,message,details}}`           | Completed | только коды docs/06; `VALIDATION_FAILED` добавлен в каталог      |
+| Prisma `User`, `Session`, `Project` (schema `creator`)                   | Completed | миграция `20261011173617_g1_auth_projects`                       |
+| `GET /me`, `PATCH /me/preferences`                                       | Completed | тема + плотность per user                                        |
+| Projects list (keyset, type, q) / create / get / draft / dup / delete    | Completed | чужой проект = `NOT_FOUND`; квота `QUOTA_EXCEEDED`               |
+| Auth rate limit                                                          | Partial   | in-memory per instance (Redis — G11)                             |
+| `@tg-creator/telegram` bridge + browser fallback                         | Completed | initData, theme, viewport, safe areas, BackButton, header colors |
+| `@tg-creator/ui-kit` theme engine                                        | Completed | Telegram/system/dark/light, WCAG-контраст, fallback палитры      |
+| project-schema templates (`empty`/`starter` × 3 типа) + clone            | Completed | схема v1 без изменений                                           |
+| Studio S01 (loader/auth/errors/dev-login)                                | Completed |                                                                  |
+| Studio S02 dashboard (search, filter, skeleton/empty/error, actions)     | Completed | «Продолжить» последний проект                                    |
+| Studio S03 wizard (type → template → name/orientation)                   | Completed | modal ≥768, fullscreen на телефоне                               |
+| Studio project page                                                      | Partial   | реальная структура черновика; редактор — Planned (G3–G4)         |
+| Studio S18 Settings: тема, плотность, аккаунт, выход                     | Completed | privacy/render/team — в соответствующих gates                    |
+| Navigation: sidebar ≥768 / bottom nav <768, Telegram BackButton          | Completed |                                                                  |
+| Tests: unit, int (Postgres), Playwright e2e desktop + mobile             | Completed | CI job `creator-integration`                                     |
+| Railway: `creator-api` + `creator-studio` (cozy-youthfulness)            | Completed | schema `creator` в postgis; меню бота → creator-studio           |
+| Visual design «Мастерская» (tokens, fonts, motion, content-browser list) | Completed | контраст пар проверяется unit-тестом; Telegram-палитра поверх    |
+| Real-device check inside Telegram clients                                | Partial   | агент не открывает клиенты Telegram; нужна ручная проверка (G10) |
 
 ## Product vertical (R0/R1)
 

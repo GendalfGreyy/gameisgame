@@ -148,7 +148,7 @@ Hierarchy слева; по центру 2D viewport с масштабом, се�
 
 ## 9. Дизайн-система и адаптивность
 
-Design tokens: neutral dark `#111622`, sidebar `#1E2637`, surface `#2B3547`, accent `#776BFF`, success `#2CBF87`, warning `#F4B454`, destructive `#E76672`. Цвет — ориентир; проверять контраст текстов. Type scale 12/14/16/20/28 px. Spacing 4/8/12/16/24 px. Keyboard focus и reduced-motion. Breakpoints — ориентиры: `<768` compact, `768–1199` adaptive, `≥1200` full desktop; плюс проверка touch pointer. На планшете разрешена двухпанельная схема. Смена темы Telegram не должна ломать читаемость Canvas.
+Design tokens (направление «Мастерская»: тёплый графит, один сигнальный цвет, чертёжная сетка точек на «холстах»): bg `#0E0E0C`, sidebar `#151513`, surface `#1C1C19`, border `#33322C`, ink `#F3F1EA`, muted `#A6A398`, accent `#D4F24A` (заливка кнопки с ink `#12130B`), success `#5AD7AE`, warning `#F5B544`, destructive `#FF7A6B`. Светлая тема — «бумага» `#F3F1EA`; лайм на светлом фоне не держит контраст, поэтому primary — чёрная заливка `#191A14` с лаймовым текстом, акцент-текст `#4D6600`. Шрифты: Unbounded (заголовки), Onest (текст), JetBrains Mono (метки/метаданные) — все с кириллицей, self-hosted. Цвет — ориентир; контраст всех пар текст/поверхность ≥ 4.5:1 проверяется тестом ui-kit. Motion: 140/220/320 ms, ease-out, только transform/opacity, stagger ≤ 40 ms × 8. Type scale 12/14/16/20/28 px. Spacing 4/8/12/16/24 px. Keyboard focus и reduced-motion. Breakpoints — ориентиры: `<768` compact, `768–1199` adaptive, `≥1200` full desktop; плюс проверка touch pointer. На планшете разрешена двухпанельная схема. Смена темы Telegram не должна ломать читаемость Canvas.
 
 ## 10. UX-критерии приемки
 

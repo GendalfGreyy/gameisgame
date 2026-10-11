@@ -62,18 +62,18 @@ test('theme switch applies immediately and is stored in the account', async ({ p
 
   await page.getByTestId('theme-dark').click();
   await expect(page.getByTestId('sync-status')).toHaveText('Сохранено в аккаунте');
-  expect(await bg()).toBe('#111622');
+  expect(await bg()).toBe('#0E0E0C');
 
   await page.getByTestId('theme-light').click();
   await expect(page.getByTestId('sync-status')).toHaveText('Сохранено в аккаунте');
-  expect(await bg()).toBe('#F5F6FA');
+  expect(await bg()).toBe('#F3F1EA');
   await expect(page.getByTestId('theme-current')).toContainText('светлая');
 
   // Drop the device copy: the server preference must restore the theme.
   await page.evaluate(() => window.localStorage.removeItem('tgc.theme'));
   await page.reload();
   await expect(page.getByTestId('settings')).toBeVisible();
-  await expect.poll(bg).toBe('#F5F6FA');
+  await expect.poll(bg).toBe('#F3F1EA');
   await expect(page.getByTestId('theme-light')).toHaveAttribute('aria-checked', 'true');
 
   await page.getByTestId('theme-telegram').click();

@@ -67,14 +67,24 @@ describe('helpers', () => {
 
   it('built-in palettes keep text readable', () => {
     for (const tokens of [DARK_TOKENS, LIGHT_TOKENS]) {
-      expect(contrastRatio(tokens.ink, tokens.bg)).toBeGreaterThanOrEqual(4.5);
-      expect(contrastRatio(tokens.muted, tokens.surface)).toBeGreaterThanOrEqual(4.5);
+      for (const surface of [tokens.bg, tokens.sidebar, tokens.surface]) {
+        for (const text of [
+          tokens.ink,
+          tokens.muted,
+          tokens.accent,
+          tokens.success,
+          tokens.warning,
+          tokens.danger,
+        ]) {
+          expect(contrastRatio(text, surface)).toBeGreaterThanOrEqual(4.5);
+        }
+      }
       expect(contrastRatio(tokens.accentInk, tokens.accentFill)).toBeGreaterThanOrEqual(4.5);
     }
   });
 
   it('exposes CSS variables and validates preferences', () => {
-    expect(themeToCssVars(DARK_TOKENS)['--ui-accent']).toBe('#776BFF');
+    expect(themeToCssVars(DARK_TOKENS)['--ui-accent']).toBe('#D4F24A');
     expect(isThemePreference('system')).toBe(true);
     expect(isThemePreference('neon')).toBe(false);
   });

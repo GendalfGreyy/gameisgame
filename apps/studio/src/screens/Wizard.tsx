@@ -11,6 +11,7 @@ import { useAuth } from '../app/auth.js';
 import { useToast } from '../app/toast.js';
 import { IconBack, IconCheck } from '../components/icons.js';
 import { ApiRequestError, errorMessage } from '../lib/api.js';
+import { TypeArt } from '../components/TypeArt.js';
 import { PROJECT_TYPES, projectTypeInfo } from '../lib/projectTypes.js';
 import { goBack, navigate } from '../lib/router.js';
 
@@ -113,7 +114,9 @@ export function Wizard({ initialType }: { initialType?: ProjectTypeDto | undefin
             <IconBack />
           </button>
           <div className="wizard__heading">
-            <span className="muted small">Шаг {step} из 3</span>
+            <span className="kicker" aria-label={`Шаг ${step} из 3`}>
+              0{step} <span className="muted">/ 03</span>
+            </span>
             <h1 id={titleId} className="wizard__title">
               {STEP_TITLES[step]}
             </h1>
@@ -122,23 +125,28 @@ export function Wizard({ initialType }: { initialType?: ProjectTypeDto | undefin
             Отмена
           </button>
         </header>
-        <div className="progress" aria-hidden="true">
-          <span style={{ width: `${(step / 3) * 100}%` }} />
+        <div className="steps" aria-hidden="true">
+          {([1, 2, 3] as const).map((item) => (
+            <span key={item} className={item <= step ? 'is-done' : undefined} />
+          ))}
         </div>
 
         {step === 1 && (
-          <div className="options" role="radiogroup" aria-label="Тип проекта">
-            {PROJECT_TYPES.map((item) => (
+          <div className="options enter" role="radiogroup" aria-label="Тип проекта">
+            {PROJECT_TYPES.map((item, index) => (
               <button
                 key={item.type}
                 type="button"
                 role="radio"
                 aria-checked={type === item.type}
-                className={`option${type === item.type ? ' is-active' : ''}`}
+                className={`option option--art enter${type === item.type ? ' is-active' : ''}`}
+                style={{ '--i': index }}
                 onClick={() => chooseType(item.type)}
                 data-testid={`wizard-type-${item.type}`}
               >
-                <span className={`type-icon type-icon--${item.type}`}>{item.icon(24)}</span>
+                <span className="option__art blueprint">
+                  <TypeArt type={item.type} />
+                </span>
                 <span className="option__body">
                   <strong>{item.label}</strong>
                   <span className="muted small">{item.description}</span>
@@ -149,7 +157,7 @@ export function Wizard({ initialType }: { initialType?: ProjectTypeDto | undefin
         )}
 
         {step === 2 && (
-          <>
+          <div className="wizard__step enter">
             <div className="options" role="radiogroup" aria-label="Шаблон">
               {(
                 [
@@ -197,11 +205,11 @@ export function Wizard({ initialType }: { initialType?: ProjectTypeDto | undefin
                 Далее
               </button>
             </footer>
-          </>
+          </div>
         )}
 
         {step === 3 && (
-          <form className="form" onSubmit={(event) => void submit(event)} noValidate>
+          <form className="form enter" onSubmit={(event) => void submit(event)} noValidate>
             <label className="field">
               <span className="field__label">Название проекта</span>
               <input
@@ -244,8 +252,15 @@ export function Wizard({ initialType }: { initialType?: ProjectTypeDto | undefin
               </div>
             )}
 
-            <div className="summary muted small">
-              {info.label} · {templateId === 'starter' ? 'стартовый шаблон' : 'пустой проект'}
+            <div className="summary">
+              <span className={`thumb thumb--${type}`}>{info.icon(20)}</span>
+              <span className="small">
+                {info.label}
+                <span className="muted">
+                  {' · '}
+                  {templateId === 'starter' ? 'стартовый шаблон' : 'пустой проект'}
+                </span>
+              </span>
             </div>
 
             {serverError && (

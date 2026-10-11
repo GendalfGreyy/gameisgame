@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 
+import { Brand } from '../components/Brand.js';
 import { IconPlus, IconProjects, IconSettings } from '../components/icons.js';
 import { goBack, navigate, type Route } from '../lib/router.js';
 import { telegram } from '../lib/telegram.js';
@@ -75,13 +76,9 @@ export function AppShell({ route, children }: { route: Route; children: ReactNod
   return (
     <div className="shell" data-testid="app-shell">
       <aside className="nav-side" aria-label="Основная навигация">
-        <div className="brand">
-          <span className="brand__mark" aria-hidden="true">
-            TG
-          </span>
-          <span className="brand__name">Creator Studio</span>
-        </div>
+        <Brand />
         <nav className="nav-side__list">{NAV_ITEMS.map((item) => navButton(item, 'side'))}</nav>
+        <p className="nav-side__foot mono">Игры и приложения для Telegram</p>
       </aside>
       <main className="shell__main">{children}</main>
       <nav className="nav-bottom" aria-label="Основная навигация">

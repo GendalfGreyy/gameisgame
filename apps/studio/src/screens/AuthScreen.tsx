@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { DEV_AUTH_UI, useAuth, type AuthState } from '../app/auth.js';
+import { Brand, BrandMark } from '../components/Brand.js';
 import { telegram } from '../lib/telegram.js';
 
 const DEV_USERS = [
@@ -10,14 +11,11 @@ const DEV_USERS = [
 
 function Loader() {
   return (
-    <div className="fullscreen" data-testid="auth-loading" aria-busy="true">
-      <div className="brand brand--large">
-        <span className="brand__mark" aria-hidden="true">
-          TG
-        </span>
-      </div>
-      <div className="spinner" aria-hidden="true" />
-      <p className="muted">Входим через Telegram…</p>
+    <div className="fullscreen blueprint" data-testid="auth-loading" aria-busy="true">
+      <span className="loader-mark">
+        <BrandMark size={56} />
+      </span>
+      <p className="muted mono small">Входим через Telegram…</p>
     </div>
   );
 }
@@ -49,13 +47,10 @@ export function AuthScreen({ state }: { state: Exclude<AuthState, { status: 'rea
         : 'Вход выполняется через подписанные данные Telegram. Откройте Creator Studio из меню бота.';
 
   return (
-    <div className="fullscreen" data-testid="auth-screen">
-      <div className="auth-card">
-        <div className="brand brand--large">
-          <span className="brand__mark" aria-hidden="true">
-            TG
-          </span>
-        </div>
+    <div className="fullscreen blueprint" data-testid="auth-screen">
+      <div className="auth-card enter">
+        <Brand large />
+        <p className="kicker">3D · 2D · приложения</p>
         <h1 className="auth-card__title">{title}</h1>
         <p className="muted">{text}</p>
 
@@ -67,7 +62,7 @@ export function AuthScreen({ state }: { state: Exclude<AuthState, { status: 'rea
 
         {!inTelegram && DEV_AUTH_UI && (
           <div className="dev-auth">
-            <p className="dev-auth__label">Режим разработки</p>
+            <p className="dev-auth__label mono">Режим разработки</p>
             <div className="segmented" role="radiogroup" aria-label="Тестовый пользователь">
               {DEV_USERS.map((user) => (
                 <button
