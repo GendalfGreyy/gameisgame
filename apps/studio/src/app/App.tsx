@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import { navigate, useRoute } from '../lib/router.js';
 import { syncViewportCssVars } from '../lib/telegram.js';
+import { EditorScreen } from '../editor/EditorScreen.js';
 import { AuthScreen } from '../screens/AuthScreen.js';
 import { Dashboard } from '../screens/Dashboard.js';
 import { ProjectPage } from '../screens/ProjectPage.js';
@@ -18,6 +19,11 @@ function Routes() {
 
   if (state.status !== 'ready') {
     return <AuthScreen state={state} />;
+  }
+
+  if (route.name === 'editor') {
+    // Full-screen workspace: no app navigation around the editor.
+    return <EditorScreen key={route.projectId} projectId={route.projectId} />;
   }
 
   let screen;
