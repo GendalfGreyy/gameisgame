@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { entityPoint, handlePoint, mouseDrag, outward, waitForViewport } from './viewport.js';
+
 const API = process.env.VITE_CREATOR_API_URL ?? 'http://127.0.0.1:3010';
 
 async function login(page: Page): Promise<string> {
@@ -155,27 +157,21 @@ test.describe('scene editor', () => {
     await expect(page.getByRole('button', { name: 'Отменить' })).toBeDisabled();
   });
 
-  test('desktop: dragging in the viewport is one undo step; conflict never overwrites silently', async ({
+  test('desktop: a gizmo drag in the 3D viewport is one undo step; conflict never overwrites silently', async ({
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'desktop workspace');
     await page.goto(`/projects/${projectId}/edit`);
     await expect(page.getByTestId('editor')).toBeVisible();
 
-    // Move tool; grab the cube near its corner (the light marker sits above its centre).
+    // Move tool; drag the X handle of the 3D gizmo in many small steps.
+    await waitForViewport(page);
     await page.keyboard.press('w');
     await expect(page.getByRole('radio', { name: 'Перемещение' })).toBeChecked();
-    const cube = page.getByTestId('viewport-entity-entity_cube');
-    const box = await cube.locator('polygon').boundingBox();
-    if (!box) throw new Error('cube not drawn');
-    const startX = box.x + box.width * 0.85;
-    const startY = box.y + box.height * 0.85;
-    await page.mouse.move(startX, startY);
-    await page.mouse.down();
-    for (let step = 1; step <= 8; step += 1) {
-      await page.mouse.move(startX + step * 12, startY + step * 6);
-    }
-    await page.mouse.up();
+    await row(page, 'Куб').click();
+    const center = await entityPoint(page, 'entity_cube');
+    const handle = await handlePoint(page, 'x');
+    await mouseDrag(page, handle, outward(center, handle, 0.9), 16);
     await expect(row(page, 'Куб')).toHaveAttribute('aria-selected', 'true');
     const x = page.getByTestId('prop-transform-position-x');
     await expect(x).not.toHaveValue('0');
