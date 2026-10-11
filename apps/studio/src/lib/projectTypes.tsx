@@ -18,7 +18,7 @@ export const PROJECT_TYPES: readonly ProjectTypeInfo[] = [
     type: 'game3d',
     label: '3D-игра',
     shortLabel: '3D',
-    description: 'Сцена с камерой, светом и объектами. Движок PlayCanvas.',
+    description: 'Сцена с камерой, светом и 3D-объектами.',
     defaultTitle: 'Мой 3D-мир',
     starterDescription: 'Камера, свет, земля и куб — можно сразу двигать объекты.',
     icon: (size) => <IconCube size={size} />,
