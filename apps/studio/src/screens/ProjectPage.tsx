@@ -6,6 +6,7 @@ import { useAuth } from '../app/auth.js';
 import { useToast } from '../app/toast.js';
 import { ConfirmDialog } from '../components/ConfirmDialog.js';
 import { IconBack, IconCopy, IconTrash } from '../components/icons.js';
+import { TypeArt } from '../components/TypeArt.js';
 import { errorMessage } from '../lib/api.js';
 import { formatDateTime, projectTypeInfo } from '../lib/projectTypes.js';
 import { goBack, navigate } from '../lib/router.js';
@@ -27,7 +28,9 @@ function Structure({ document }: { document: ProjectDocument }) {
               {Object.values(page.components)
                 .filter((component) => component.id !== page.rootComponentId)
                 .map((component) => (
-                  <li key={component.id}>{component.type}</li>
+                  <li key={component.id}>
+                    <span className="tree__meta mono">{component.type}</span>
+                  </li>
                 ))}
             </ul>
           </li>
@@ -49,10 +52,9 @@ function Structure({ document }: { document: ProjectDocument }) {
             const entity = scene.entities[entityId];
             return entity ? (
               <li key={entity.id}>
-                {entity.name}
-                <span className="muted small">
-                  {' '}
-                  · {entity.components.map((component) => component.type).join(', ')}
+                <span className="tree__name">{entity.name}</span>
+                <span className="tree__meta mono">
+                  {entity.components.map((component) => component.type).join(' · ')}
                 </span>
               </li>
             ) : null;
@@ -178,37 +180,41 @@ export function ProjectPage({ projectId }: { projectId: string }) {
           >
             <IconBack />
           </button>
-          <span className={`type-icon type-icon--${project.type}`}>{info.icon(22)}</span>
-          <div>
+          <div className="page__heading">
+            <p className="kicker">
+              {info.label} · ревизия {project.revision}
+            </p>
             <h1 className="page__title" data-testid="project-title">
               {project.title}
             </h1>
-            <p className="muted small">
-              {info.label} · ревизия {project.revision}
-            </p>
           </div>
         </div>
       </header>
 
-      <div className="notice" role="note">
-        <strong>Редактор в разработке</strong>
-        <span>
-          Сцена, иерархия и инспектор появятся на этапах G3–G4. Черновик уже сохранён на сервере —
-          ниже его текущая структура.
-        </span>
-      </div>
-
       <div className="columns">
-        <section className="card">
-          <h2 className="section-title">Структура черновика</h2>
-          {document ? (
-            <Structure document={document} />
-          ) : (
-            <p className="muted">Документ использует неподдерживаемую версию схемы.</p>
-          )}
-        </section>
-        <section className="card">
-          <h2 className="section-title">Сведения</h2>
+        <div className="stack">
+          <section className="viewport blueprint enter" aria-label="Предпросмотр">
+            <span className="viewport__label mono">Вьюпорт</span>
+            <TypeArt type={project.type} className="viewport__art" />
+            <div className="notice" role="note">
+              <strong>Редактор в разработке</strong>
+              <span>
+                Сцена, иерархия и инспектор появятся на этапах G3–G4. Черновик уже сохранён на
+                сервере — ниже его текущая структура.
+              </span>
+            </div>
+          </section>
+          <section className="card panel enter" style={{ '--i': 1 }}>
+            <h2 className="panel__title">Структура черновика</h2>
+            {document ? (
+              <Structure document={document} />
+            ) : (
+              <p className="muted">Документ использует неподдерживаемую версию схемы.</p>
+            )}
+          </section>
+        </div>
+        <section className="card panel enter" style={{ '--i': 2 }}>
+          <h2 className="panel__title">Сведения</h2>
           <dl className="facts">
             <dt>Создан</dt>
             <dd>{formatDateTime(project.createdAt)}</dd>

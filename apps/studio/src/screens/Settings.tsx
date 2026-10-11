@@ -98,12 +98,19 @@ export function Settings() {
   return (
     <div className="page page--narrow" data-testid="settings">
       <header className="page__header">
-        <h1 className="page__title">Настройки</h1>
+        <div className="page__heading">
+          <p className="kicker">Студия</p>
+          <h1 className="page__title">Настройки</h1>
+        </div>
       </header>
 
-      <section className="card settings-section" aria-labelledby="appearance-title">
+      <section
+        className="card panel settings-section enter"
+        style={{ '--i': 0 }}
+        aria-labelledby="appearance-title"
+      >
         <div className="section-head">
-          <h2 id="appearance-title" className="section-title">
+          <h2 id="appearance-title" className="panel__title">
             Оформление
           </h2>
           <span className="muted small" data-testid="sync-status" aria-live="polite">
@@ -169,8 +176,12 @@ export function Settings() {
         <p className="muted small">На сенсорных экранах кнопки остаются не меньше 44 px.</p>
       </section>
 
-      <section className="card settings-section" aria-labelledby="account-title">
-        <h2 id="account-title" className="section-title">
+      <section
+        className="card panel settings-section enter"
+        style={{ '--i': 1 }}
+        aria-labelledby="account-title"
+      >
+        <h2 id="account-title" className="panel__title">
           Аккаунт
         </h2>
         <div className="account">
@@ -208,8 +219,12 @@ export function Settings() {
         </button>
       </section>
 
-      <section className="card settings-section" aria-labelledby="about-title">
-        <h2 id="about-title" className="section-title">
+      <section
+        className="card panel settings-section enter"
+        style={{ '--i': 2 }}
+        aria-labelledby="about-title"
+      >
+        <h2 id="about-title" className="panel__title">
           О приложении
         </h2>
         <dl className="facts">

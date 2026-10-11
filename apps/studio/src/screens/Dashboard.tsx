@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth, useMe } from '../app/auth.js';
 import { useToast } from '../app/toast.js';
 import { ConfirmDialog } from '../components/ConfirmDialog.js';
-import { IconCopy, IconPlus, IconSearch, IconTrash } from '../components/icons.js';
+import { IconArrow, IconCopy, IconPlus, IconSearch, IconTrash } from '../components/icons.js';
+import { TypeArt } from '../components/TypeArt.js';
 import { errorMessage } from '../lib/api.js';
 import { formatDateTime, PROJECT_TYPES, projectTypeInfo } from '../lib/projectTypes.js';
 import { navigate } from '../lib/router.js';
@@ -29,27 +30,85 @@ function useDebounced<T>(value: T, delayMs: number): T {
   return debounced;
 }
 
-function SkeletonGrid() {
+function SkeletonRows() {
   return (
-    <div className="grid" aria-hidden="true" data-testid="projects-skeleton">
+    <div className="library" aria-hidden="true" data-testid="projects-skeleton">
       {[0, 1, 2].map((key) => (
-        <div key={key} className="card card--skeleton">
-          <div className="skeleton skeleton--icon" />
-          <div className="skeleton skeleton--line" />
-          <div className="skeleton skeleton--line skeleton--short" />
+        <div key={key} className="project-row project-row--skeleton">
+          <div className="skeleton skeleton--thumb" />
+          <div className="project-row__body">
+            <div className="skeleton skeleton--line" />
+            <div className="skeleton skeleton--line skeleton--short" />
+          </div>
         </div>
       ))}
     </div>
   );
 }
 
-function ProjectCard({
+function Launchpad() {
+  return (
+    <section className="launchpad" aria-labelledby="launchpad-title">
+      <h2 id="launchpad-title" className="kicker">
+        Новый проект
+      </h2>
+      <div className="launchpad__grid">
+        {PROJECT_TYPES.map((info, index) => (
+          <button
+            key={info.type}
+            type="button"
+            className={`launch-tile launch-tile--${info.type} enter`}
+            style={{ '--i': index }}
+            onClick={() => navigate({ name: 'wizard', type: info.type })}
+            data-testid={`launch-${info.type}`}
+          >
+            <span className="launch-tile__art blueprint">
+              <TypeArt type={info.type} />
+            </span>
+            <span className="launch-tile__label">
+              {info.label}
+              <IconArrow size={16} />
+            </span>
+            <span className="launch-tile__desc">{info.description}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function QuotaMeter({ used, limit }: { used: number; limit: number }) {
+  const ratio = limit > 0 ? Math.min(used / limit, 1) : 0;
+  return (
+    <div className="quota" title={`${used} из ${limit} проектов`}>
+      <span className="quota__value mono">
+        {used}
+        <span className="muted">/{limit}</span>
+      </span>
+      <span
+        className={`quota__bar${ratio >= 0.9 ? ' is-full' : ''}`}
+        role="meter"
+        aria-label="Проекты"
+        aria-valuemin={0}
+        aria-valuemax={limit}
+        aria-valuenow={used}
+        aria-valuetext={`${used} из ${limit} проектов`}
+      >
+        <span style={{ transform: `scaleX(${ratio})` }} />
+      </span>
+    </div>
+  );
+}
+
+function ProjectRow({
   project,
+  index,
   onDuplicate,
   onDelete,
   busy,
 }: {
   project: ProjectSummary;
+  index: number;
   onDuplicate: () => void;
   onDelete: () => void;
   busy: boolean;
@@ -57,37 +116,44 @@ function ProjectCard({
   const info = projectTypeInfo(project.type);
   const open = () => navigate({ name: 'project', projectId: project.id });
   return (
-    <article className="card project-card" data-testid="project-card">
-      <button type="button" className="project-card__main" onClick={open}>
-        <span className={`type-icon type-icon--${project.type}`}>{info.icon(22)}</span>
-        <span className="project-card__body">
-          <span className="project-card__title">{project.title}</span>
-          <span className="project-card__meta">
-            {info.label} · изменён {formatDateTime(project.lastEditedAt)}
+    <article
+      className="project-row enter"
+      style={{ '--i': Math.min(index, 8) }}
+      data-testid="project-card"
+    >
+      <button type="button" className="project-row__open" onClick={open}>
+        <span className={`thumb thumb--${project.type}`}>{info.icon(22)}</span>
+        <span className="project-row__body">
+          <span className="project-row__title">{project.title}</span>
+          <span className="project-row__meta mono">
+            <span className={`tag tag--${project.type}`}>{info.shortLabel}</span>
+            <span>{formatDateTime(project.lastEditedAt)}</span>
           </span>
         </span>
+        <span className="project-row__go" aria-hidden="true">
+          <IconArrow size={18} />
+        </span>
       </button>
-      <div className="project-card__actions">
-        <button type="button" className="btn btn--primary btn--small" onClick={open}>
-          Открыть
-        </button>
+      <div className="project-row__actions">
         <button
           type="button"
-          className="btn btn--ghost btn--small"
+          className="icon-btn icon-btn--quiet"
           onClick={onDuplicate}
           disabled={busy}
+          aria-label={`Дублировать «${project.title}»`}
+          title="Дублировать"
         >
-          <IconCopy size={16} />
-          <span>Дублировать</span>
+          <IconCopy size={18} />
         </button>
         <button
           type="button"
-          className="btn btn--ghost btn--small btn--danger-text"
+          className="icon-btn icon-btn--quiet icon-btn--danger"
           onClick={onDelete}
           disabled={busy}
+          aria-label={`Удалить «${project.title}»`}
+          title="Удалить"
         >
-          <IconTrash size={16} />
-          <span>Удалить</span>
+          <IconTrash size={18} />
         </button>
       </div>
     </article>
@@ -204,24 +270,45 @@ export function Dashboard() {
   return (
     <div className="page" data-testid="dashboard">
       <header className="page__header">
-        <div>
+        <div className="page__heading">
+          <p className="kicker">Студия</p>
           <h1 className="page__title">Мои проекты</h1>
-          <p className="muted small">
-            {used} из {limit} проектов
-          </p>
         </div>
-        <button
-          type="button"
-          className="btn btn--primary"
-          data-testid="create-project"
-          onClick={() => navigate({ name: 'wizard' })}
-        >
-          <IconPlus size={18} />
-          <span>Создать</span>
-        </button>
+        <div className="page__header-side">
+          <QuotaMeter used={used} limit={limit} />
+          <button
+            type="button"
+            className="btn btn--primary"
+            data-testid="create-project"
+            onClick={() => navigate({ name: 'wizard' })}
+          >
+            <IconPlus size={18} />
+            <span>Создать</span>
+          </button>
+        </div>
       </header>
 
+      <Launchpad />
+
+      {resume && (
+        <button
+          type="button"
+          className="resume enter"
+          onClick={() => navigate({ name: 'project', projectId: resume.id })}
+        >
+          <span className={`thumb thumb--${resume.type}`}>
+            {projectTypeInfo(resume.type).icon(22)}
+          </span>
+          <span className="resume__body">
+            <span className="kicker">Продолжить</span>
+            <strong className="resume__title">{resume.title}</strong>
+          </span>
+          <IconArrow size={20} />
+        </button>
+      )}
+
       <div className="toolbar">
+        <h2 className="section-title toolbar__title">Библиотека</h2>
         <label className="search">
           <IconSearch size={18} />
           <input
@@ -249,18 +336,7 @@ export function Dashboard() {
         </div>
       </div>
 
-      {resume && (
-        <button
-          type="button"
-          className="resume"
-          onClick={() => navigate({ name: 'project', projectId: resume.id })}
-        >
-          <span className="muted small">Продолжить</span>
-          <strong>{resume.title}</strong>
-        </button>
-      )}
-
-      {state.status === 'loading' && <SkeletonGrid />}
+      {state.status === 'loading' && <SkeletonRows />}
 
       {state.status === 'error' && (
         <div className="state" role="alert" data-testid="projects-error">
@@ -275,20 +351,9 @@ export function Dashboard() {
       {state.status === 'ready' && state.items.length === 0 && !filtersActive && (
         <div className="state" data-testid="projects-empty">
           <h2 className="state__title">Здесь появятся ваши проекты</h2>
-          <p className="muted">Начните с игры или приложения — шаблон можно выбрать дальше.</p>
-          <div className="quick-start">
-            {PROJECT_TYPES.map((info) => (
-              <button
-                key={info.type}
-                type="button"
-                className="quick-start__item"
-                onClick={() => navigate({ name: 'wizard', type: info.type })}
-              >
-                <span className={`type-icon type-icon--${info.type}`}>{info.icon(22)}</span>
-                <span>{info.label}</span>
-              </button>
-            ))}
-          </div>
+          <p className="muted">
+            Выберите тип в блоке «Новый проект» — шаблон можно выбрать на следующем шаге.
+          </p>
         </div>
       )}
 
@@ -310,10 +375,11 @@ export function Dashboard() {
 
       {state.status === 'ready' && state.items.length > 0 && (
         <>
-          <div className="grid" data-testid="projects-grid">
-            {state.items.map((project) => (
-              <ProjectCard
+          <div className="library" data-testid="projects-grid">
+            {state.items.map((project, index) => (
+              <ProjectRow
                 key={project.id}
+                index={index}
                 project={project}
                 busy={busyId === project.id}
                 onDuplicate={() => void duplicate(project)}

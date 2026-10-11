@@ -91,6 +91,12 @@ export const IconBack = (props: IconProps) => (
   </Svg>
 );
 
+export const IconArrow = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </Svg>
+);
+
 export const IconCheck = (props: IconProps) => (
   <Svg {...props}>
     <path d="m5 12 5 5 9-10" />
