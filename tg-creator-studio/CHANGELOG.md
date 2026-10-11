@@ -2,6 +2,13 @@
 
 Формат: дата, версия, изменённые файлы и причина. Любая правка docs/ обязана получить запись здесь — это журнал источника истины.
 
+## 1.1.2 — 2026-10-11 (G1 implementation)
+
+- `docs/06-ERROR-CATALOG.md`: новый раздел «Запросы» — код `VALIDATION_FAILED` (422) для невалидного тела/параметров запроса (не ProjectDocument; для документа остаётся `SCHEMA_INVALID`).
+- `docs/04-API-DATA-CONTRACT.md` §2: `POST /auth/dev` (dev-only), `PATCH /me/preferences` (тема `telegram|system|dark|light`, плотность `comfortable|compact`), формат session/`GET /me`. §3: `GET /projects` получил `q` и `limit`, описаны keyset-пагинация, ответ `POST /projects`, `templateId`/`orientation`.
+- `project-schema`: схема v1 **не менялась** (миграция не требуется); добавлены шаблоны `createProjectDocument` (`empty`/`starter` для `game3d`/`game2d`/`app`) и `cloneProjectDocument`, покрытые roundtrip-тестами.
+- TASKS/IMPLEMENTED: G1 Completed.
+
 ## 1.1.1 — 2026-10-10 (G0 implementation)
 
 - Реализован G0 Infra в monorepo game-is-game: `apps/studio`, `apps/player`, `apps/creator-api`, `apps/worker`, `packages/project-schema`, `packages/creator-shared` (`@tg-creator/shared`), Planned stubs engine/editor/…

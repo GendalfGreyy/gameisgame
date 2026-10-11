@@ -52,18 +52,26 @@ docs/
   PHASES/              Phased implementation roadmap
 ```
 
-## TG Creator Studio (G0)
+## TG Creator Studio (G1)
 
 Node **22** (`.nvmrc`), pnpm **9.15.0**. Spec: [`tg-creator-studio/`](./tg-creator-studio/).
 
 ```bash
 docker compose up -d
 pnpm install
-# migrate creator tables (same Postgres as Game is Game)
-CREATOR_DATABASE_URL="$DATABASE_URL" pnpm --filter @tg-creator/creator-api prisma migrate deploy
-pnpm --filter @tg-creator/creator-api dev   # :3010  GET /health
-pnpm --filter @tg-creator/studio dev        # :5174
+# CREATOR_DATABASE_URL must use its own schema: ...?schema=creator
+pnpm --filter @tg-creator/creator-api db:deploy
+pnpm --filter @tg-creator/creator-api dev   # :3010  /api/v1/{health,auth,me,projects}
+pnpm --filter @tg-creator/studio dev        # :5174  dashboard, wizard, settings
 pnpm --filter @tg-creator/player dev        # :5175
+```
+
+Outside Telegram, set `CREATOR_DEV_AUTH=true` (development only) to get the dev-login button.
+Integration tests use an isolated `creator_test` schema; e2e starts both servers itself:
+
+```bash
+pnpm --filter @tg-creator/creator-api test:int
+pnpm --filter @tg-creator/studio test:e2e
 ```
 
 See [`tg-creator-studio/ARCHITECTURE.md`](./tg-creator-studio/ARCHITECTURE.md) and [`CLAUDE.md`](./CLAUDE.md).

@@ -14,6 +14,7 @@
         "VITE_POSTHOG_HOST",
         "VITE_BOOSTS_ENABLED",
         "VITE_CREATOR_API_URL",
+        "VITE_CREATOR_DEV_AUTH",
         "CREATOR_API_PORT",
         "CREATOR_DATABASE_URL"
       ]
