@@ -11,8 +11,10 @@ import { applyCommand, type EditorCommand } from './commands.js';
 import {
   addComponentCommand,
   createEntityCommand,
+  createModelEntityCommand,
   duplicateEntityCommand,
   findComponent,
+  setMeshModelCommand,
   setTransformCommand,
 } from './factories.js';
 import { createSequentialIdGenerator } from './ids.js';
@@ -263,3 +265,85 @@ describe('applyCommand — rejects edits the server would refuse', () => {
     expect(flattenHierarchy(scene(document)).map((row) => row.entity.name)).toContain('Сфера');
   });
 });
+
+describe('assets and batches', () => {
+  const ids = createSequentialIdGenerator();
+  const base = starterDocument();
+  const tree = { id: 'builtin_tree', version: '1', kind: 'model' } as const;
+
+  it('asset.add / asset.remove are exact inverses', () => {
+    const next = expectInverse(base, { type: 'asset.add', index: 0, asset: tree });
+    expect(next.assetRefs).toEqual([tree]);
+    expect(applyCommand(next, { type: 'asset.add', index: 0, asset: tree })).toMatchObject({
+      ok: false,
+      error: { code: 'ASSET_EXISTS' },
+    });
+    expect(applyCommand(base, { type: 'asset.remove', assetId: 'nope' })).toMatchObject({
+      ok: false,
+      error: { code: 'ASSET_NOT_FOUND' },
+    });
+  });
+
+  it('assigning a model registers the AssetRef in one step; undo removes both', () => {
+    const command = setMeshModelCommand(base, SCENE, 'entity_cube', tree);
+    if (!command) throw new Error('no mesh');
+    expect(command.type).toBe('batch');
+    const next = expectInverse(base, command);
+    const mesh = findComponent(getEntity(scene(next), 'entity_cube') ?? never(), 'mesh');
+    expect(mesh?.data.assetId).toBe('builtin_tree');
+    expect(next.assetRefs).toEqual([tree]);
+
+    // Second assignment reuses the registered ref.
+    const again = setMeshModelCommand(next, SCENE, 'entity_cube', tree);
+    expect(again?.type === 'batch' ? again.commands.map((step) => step.type) : []).toEqual([
+      'component.update',
+    ]);
+    // Clearing goes back to the primitive and keeps the ref for later reuse.
+    const cleared = expectInverse(
+      next,
+      setMeshModelCommand(next, SCENE, 'entity_cube', null) ?? never(),
+    );
+    expect(
+      findComponent(getEntity(scene(cleared), 'entity_cube') ?? never(), 'mesh')?.data.assetId,
+    ).toBeNull();
+  });
+
+  it('a referenced asset cannot be removed (integrity)', () => {
+    const next = apply(
+      base,
+      setMeshModelCommand(base, SCENE, 'entity_cube', tree) ?? never(),
+    ).document;
+    expect(applyCommand(next, { type: 'asset.remove', assetId: 'builtin_tree' })).toMatchObject({
+      ok: false,
+      error: { code: 'INTEGRITY' },
+    });
+  });
+
+  it('createModelEntityCommand inserts a model object and its asset atomically', () => {
+    const { command, entityId } = createModelEntityCommand(
+      base,
+      { sceneId: SCENE, name: 'Дерево' },
+      tree,
+      ids,
+    );
+    const next = expectInverse(base, command);
+    expect(getEntity(scene(next), entityId)?.name).toBe('Дерево');
+  });
+
+  it('a failing step rejects the whole batch and leaves the document untouched', () => {
+    const frozen = deepFreeze(JSON.parse(JSON.stringify(base)) as ProjectDocument);
+    const result = applyCommand(frozen, {
+      type: 'batch',
+      commands: [
+        { type: 'asset.add', index: 0, asset: tree },
+        { type: 'entity.rename', sceneId: SCENE, entityId: 'missing', name: 'x' },
+      ],
+    });
+    expect(result).toMatchObject({ ok: false, error: { code: 'ENTITY_NOT_FOUND' } });
+    expect(frozen.assetRefs).toEqual([]);
+  });
+});
+
+function never(): never {
+  throw new Error('unexpected missing value');
+}
