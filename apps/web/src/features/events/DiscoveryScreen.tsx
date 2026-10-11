@@ -2,12 +2,7 @@ import type { UserProfile } from '@game-is-game/shared';
 import { useState } from 'react';
 
 import { haptics } from '../../shared/lib/haptics.js';
-import {
-  AnimatedNumber,
-  EventCardSkeleton,
-  Sonar,
-  Stagger,
-} from '../../shared/ui/motion.js';
+import { AnimatedNumber, EventCardSkeleton, Sonar, Stagger } from '../../shared/ui/motion.js';
 import { Avatar, Chip, ErrorBanner } from '../../shared/ui/primitives.js';
 import { LazyEventsRadarMap } from '../map/LazyMaps.js';
 import { useGeolocation } from '../privacy/geolocation.js';
@@ -103,7 +98,11 @@ export function DiscoveryScreen({
       {viewMode === 'radar' ? (
         <div className="animate-fade-up space-y-2">
           <div className="overflow-hidden rounded-4xl border border-black/[0.06] shadow-card">
-            <LazyEventsRadarMap center={geo.position} events={radarEvents} onOpenEvent={onOpenEvent} />
+            <LazyEventsRadarMap
+              center={geo.position}
+              events={radarEvents}
+              onOpenEvent={onOpenEvent}
+            />
           </div>
           <p className="text-xs leading-relaxed text-gig-muted">
             Heat-зоны — агрегат активности, без точек людей. Пины — события.

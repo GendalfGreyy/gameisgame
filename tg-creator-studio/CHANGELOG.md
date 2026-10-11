@@ -1,0 +1,20 @@
+# CHANGELOG спецификации TG Creator Studio
+
+Формат: дата, версия, изменённые файлы и причина. Любая правка docs/ обязана получить запись здесь — это журнал источника истины.
+
+## 1.1.1 — 2026-10-10 (G0 implementation)
+
+- Реализован G0 Infra в monorepo game-is-game: `apps/studio`, `apps/player`, `apps/creator-api`, `apps/worker`, `packages/project-schema`, `packages/creator-shared` (`@tg-creator/shared`), Planned stubs engine/editor/…
+- `docs/06-ERROR-CATALOG.md`: добавлены `INTERNAL_ERROR`, `SERVICE_UNAVAILABLE`.
+- `ARCHITECTURE.md`, `TASKS.md`, `IMPLEMENTED.md` синхронизированы со статусом G0 Completed.
+
+## 1.1 — 2026-10-10
+
+- README: исправлен перечень промптов (было «01–12», фактически 00–14); добавлена таблица «промпт → gate»; добавлена ссылка на `docs/06-ERROR-CATALOG.md`.
+- NEW `docs/06-ERROR-CATALOG.md`: нормативный реестр машинных error.code, на который ссылается docs/04, §1. Раньше коды выдумывались на месте.
+- `docs/04-API-DATA-CONTRACT.md`: §1 явно ссылается на каталог `docs/06-ERROR-CATALOG.md`.
+- `docs/05-ROADMAP-AND-QA.md`: в таблицу gates добавлена колонка «Промпт» (01↔G0 … 12↔G11; 13–14↔G12), синхронно с README.
+- `.cursor/rules/tg-creator-studio.mdc`: добавлены инварианты 13–15 (секреты, миграции schemaVersion, единый формат error.code).
+- `prompts/00-START-HERE.md`: добавлен обязательный блок Definition of Done — единый протокол завершения любого этапа; чтение docs расширено до `docs/06`.
+- Остальные промпты (01–14): без изменений содержания; к каждому применим DoD-протокол из промпта 00.
+- Полный комплект 1.0 (`docs/01–05`, `prompts/01–14`, `examples/project-3d.v1.json`) включён в репозиторий и усилен патчами 1.1.

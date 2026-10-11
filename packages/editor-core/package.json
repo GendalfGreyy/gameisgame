@@ -1,0 +1,28 @@
+{
+  "name": "@tg-creator/editor-core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Editor command bus, selection, history (Planned G3)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "rm -f tsconfig.tsbuildinfo && tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "echo 'lint runs from root' && exit 0",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.4"
+  }
+}

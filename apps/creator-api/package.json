@@ -1,0 +1,39 @@
+{
+  "name": "@tg-creator/creator-api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TG Creator Studio NestJS API — health, projects, publish (G0+).",
+  "type": "module",
+  "scripts": {
+    "build": "prisma generate && nest build",
+    "dev": "node --env-file=../../.env ./node_modules/tsx/dist/cli.mjs watch src/main.ts",
+    "start": "node dist/main.js",
+    "test": "vitest run",
+    "lint": "echo 'lint runs from root' && exit 0",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "clean": "rm -rf dist .turbo generated",
+    "prisma": "prisma",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.7",
+    "@nestjs/config": "^4.0.0",
+    "@nestjs/core": "^11.0.7",
+    "@nestjs/platform-express": "^11.0.7",
+    "@prisma/client": "^6.2.1",
+    "@tg-creator/shared": "workspace:*",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.2",
+    "@nestjs/schematics": "^11.0.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.5",
+    "prisma": "^6.2.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.4"
+  }
+}

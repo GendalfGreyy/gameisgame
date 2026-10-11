@@ -1,0 +1,22 @@
+// TG Creator Studio — G0 Prisma schema.
+// Coexists with @game-is-game/db in the same Postgres instance (separate tables).
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Prefer CREATOR_DATABASE_URL at runtime (PrismaService). CLI migrate uses DATABASE_URL.
+  url      = env("DATABASE_URL")
+}
+
+/// Bootstrap marker so Prisma has a model; domain tables land in later gates.
+model CreatorSchemaMeta {
+  id        String   @id @default("singleton")
+  version   Int      @default(1)
+  updatedAt DateTime @updatedAt
+
+  @@map("creator_schema_meta")
+}

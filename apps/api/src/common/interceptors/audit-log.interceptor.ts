@@ -1,10 +1,4 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  Inject,
-  Injectable,
-  NestInterceptor,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { tap } from 'rxjs';
 
@@ -20,7 +14,10 @@ export class AuditLogInterceptor implements NestInterceptor {
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler) {
-    const meta = this.reflector.get<AuditActionMeta | undefined>(AUDIT_ACTION_KEY, context.getHandler());
+    const meta = this.reflector.get<AuditActionMeta | undefined>(
+      AUDIT_ACTION_KEY,
+      context.getHandler(),
+    );
     if (!meta) {
       return next.handle();
     }

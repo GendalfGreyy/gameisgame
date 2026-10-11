@@ -138,12 +138,7 @@ export class EventsService {
     }
 
     const location = await this.getGeoPoint(event.id);
-    return this.toEventDetail(
-      event,
-      location.lat,
-      location.lng,
-      event.participants.length > 0,
-    );
+    return this.toEventDetail(event, location.lat, location.lng, event.participants.length > 0);
   }
 
   async update(eventId: string, actorId: string, input: UpdateEventRequest): Promise<EventDetail> {
@@ -168,9 +163,7 @@ export class EventsService {
         ...(input.communityId !== undefined ? { communityId: input.communityId } : {}),
         ...(input.startsAt !== undefined ? { startsAt: new Date(input.startsAt) } : {}),
         ...(input.endsAt !== undefined ? { endsAt: new Date(input.endsAt) } : {}),
-        ...(input.maxParticipants !== undefined
-          ? { maxParticipants: input.maxParticipants }
-          : {}),
+        ...(input.maxParticipants !== undefined ? { maxParticipants: input.maxParticipants } : {}),
         ...(input.status !== undefined ? { status: input.status } : {}),
       },
     });

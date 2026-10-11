@@ -1,11 +1,5 @@
 import { haptics } from '../lib/haptics.js';
-import {
-  IconCreate,
-  IconDiscover,
-  IconProfile,
-  IconSquad,
-  IconTrophy,
-} from './icons.js';
+import { IconCreate, IconDiscover, IconProfile, IconSquad, IconTrophy } from './icons.js';
 
 export type MainTab = 'discover' | 'create' | 'leaderboard' | 'squad' | 'profile';
 

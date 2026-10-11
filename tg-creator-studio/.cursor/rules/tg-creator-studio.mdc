@@ -1,0 +1,35 @@
+---
+description: TG Creator Studio — инварианты агента для конструктора игр в Telegram Mini App
+globs:
+  - "tg-creator-studio/**/*"
+  - "apps/**/*"
+  - "packages/**/*"
+alwaysApply: false
+---
+
+# TG Creator Studio — Cursor rules
+
+Спецификация: `tg-creator-studio/` (версия пакета — см. `CHANGELOG.md`).
+Источник истины по продукту: `docs/01`…`docs/06`. Не выдумывай API и error.code вне каталога.
+
+## Invariants
+
+1. Один репозиторий / один продукт. Не создавай параллельные «временные» приложения вместо инкремента по gates.
+2. UI Mini App и редактора — на русском (как в UX-спеке), если docs явно не требуют иначе.
+3. Auth: Telegram `initData` HMAC на сервере → собственные сессии/JWT. Dev-auth только в development и блокируется в production (`AUTH_DEV_FORBIDDEN`).
+4. Не вызывай Telegram Bot API с фронтенда. Всё через backend.
+5. Документ проекта — версионируемая schema (`schemaVersion`); сохранения с optimistic concurrency (`baseRevision` → `REVISION_CONFLICT`).
+6. Публикация — иммутабельный snapshot + share-link; без настроенного bot username — `PUBLISH_LINK_NOT_CONFIGURED`, не фиктивная ссылка.
+7. Runtime публичных игр — allowlist действий; запрещён произвольный eval пользовательского кода на сервере.
+8. Секреты и PII не логировать; координаты/initData/токены — вне логов.
+9. Типы и DTO — zod (или эквивалент) как контракт; без `any` / `@ts-ignore` без обоснования.
+10. Этапы идут строго по промптам 01→…; R2 (13–14) только после приёмки предусловий G12.
+11. Не заявляй готовым то, что в `IMPLEMENTED.md` помечено Planned/Partial.
+12. Не добавляй Timeline UI / R2-панели до соответствующих gates (см. docs/02, docs/05).
+13. Секреты (токены ботов, S3-ключи, сессионные секреты) — только через env/secret store; запрещены в коде, логах, тестовых фикстурах и коммитах. `.env` в `.gitignore`, `.env.example` — с placeholders.
+14. Любое изменение `project-schema` требует: (a) новой/обновлённой чистой миграции с тестом, (b) обновления `examples/`, (c) записи в `CHANGELOG.md` пакета, (d) зелёного roundtrip-теста serialize→deserialize.
+15. Все ошибки API используют коды строго из `docs/06-ERROR-CATALOG.md`; новый код — только с обновлением каталога в том же коммите.
+
+## Definition of Done
+
+Каждый этап закрывается протоколом из `prompts/00-START-HERE.md` (lint/typecheck/test, отчёт, TASKS/IMPLEMENTED, error catalog, schema migrations). Красные проверки = стоп, не следующий промпт.

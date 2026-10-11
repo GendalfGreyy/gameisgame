@@ -59,9 +59,7 @@ export function CheckInCard({ eventId }: { eventId: string }) {
         <ConfettiBurst />
         {result.pointsAwarded ? <PointsFly amount={result.pointsAwarded} /> : null}
         <p className="animate-pop text-4xl">🎉</p>
-        <p className="mt-2 text-lg font-bold text-emerald-700 dark:text-emerald-300">
-          Ты в игре!
-        </p>
+        <p className="mt-2 text-lg font-bold text-emerald-700 dark:text-emerald-300">Ты в игре!</p>
         {result.pointsAwarded ? (
           <p className="mt-1 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
             +{result.pointsAwarded} очков на счёт

@@ -4,7 +4,13 @@ import { PRIVACY_MODES } from '@game-is-game/shared';
 import { useAuthStore } from '../auth/store.js';
 import { useUpdatePrivacyMode } from '../privacy/hooks.js';
 import { useThemeStore } from '../../shared/lib/theme.js';
-import { Card, ErrorBanner, GhostButton, PageTitle, ThemeSwitch } from '../../shared/ui/primitives.js';
+import {
+  Card,
+  ErrorBanner,
+  GhostButton,
+  PageTitle,
+  ThemeSwitch,
+} from '../../shared/ui/primitives.js';
 
 const LABELS: Record<PrivacyMode, { title: string; hint: string }> = {
   precise: {
@@ -44,11 +50,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
             <p className="text-[17px] font-bold text-gig-ink">Тёмная тема</p>
             <p className="mt-0.5 text-[15px] text-gig-muted">Комфортнее вечером и ночью</p>
           </div>
-          <ThemeSwitch
-            checked={theme === 'dark'}
-            onChange={toggleTheme}
-            label="Тёмная тема"
-          />
+          <ThemeSwitch checked={theme === 'dark'} onChange={toggleTheme} label="Тёмная тема" />
         </Card>
       </div>
 
@@ -82,7 +84,13 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
                   }`}
                   aria-hidden
                 >
-                  <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.4}>
+                  <svg
+                    viewBox="0 0 16 16"
+                    className="h-3.5 w-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2.4}
+                  >
                     <path d="m3 8.5 3.2 3L13 4.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>

@@ -76,8 +76,7 @@ export class AuthService {
     const telegramId = BigInt(parsed.user.id);
 
     const existing = await this.prisma.user.findUnique({ where: { telegramId } });
-    const referrerId =
-      existing === null ? await this.resolveReferrerId(parsed.startParam) : null;
+    const referrerId = existing === null ? await this.resolveReferrerId(parsed.startParam) : null;
 
     const user = existing
       ? await this.prisma.user.update({
@@ -124,7 +123,9 @@ export class AuthService {
     };
   }
 
-  async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; expiresIn: number }> {
+  async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; expiresIn: number }> {
     const refreshSecret = this.configService.get('JWT_REFRESH_SECRET', { infer: true });
     let payload: { sub: string; jti: string };
     try {

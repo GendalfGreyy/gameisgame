@@ -2,11 +2,11 @@
 
 ## Modes (`User.privacyMode`)
 
-| Mode | Discovery queries | Social presence |
-|------|-------------------|-----------------|
-| `precise` | Exact coordinates sent to API | Friends see you're on an event (check-in context) |
-| `approximate` (default) | Coordinates snapped to ~5 km grid | Friends see obfuscated presence |
-| `hidden` | Coordinates still used for nearby search (server-side only) | Hidden from friend notifications & presence surfaces |
+| Mode                    | Discovery queries                                           | Social presence                                      |
+| ----------------------- | ----------------------------------------------------------- | ---------------------------------------------------- |
+| `precise`               | Exact coordinates sent to API                               | Friends see you're on an event (check-in context)    |
+| `approximate` (default) | Coordinates snapped to ~5 km grid                           | Friends see obfuscated presence                      |
+| `hidden`                | Coordinates still used for nearby search (server-side only) | Hidden from friend notifications & presence surfaces |
 
 ## Data minimization
 

@@ -19,9 +19,7 @@ import type { Env } from '../../config/env.schema.js';
  */
 @Injectable()
 export class ServiceTokenGuard implements CanActivate {
-  constructor(
-    @Inject(ConfigService) private readonly configService: ConfigService<Env, true>,
-  ) {}
+  constructor(@Inject(ConfigService) private readonly configService: ConfigService<Env, true>) {}
 
   canActivate(context: ExecutionContext): boolean {
     const secret = this.configService.get('SERVICE_JWT_SECRET', { infer: true });
@@ -29,9 +27,7 @@ export class ServiceTokenGuard implements CanActivate {
       throw new ServiceUnavailableException('Internal API is not configured');
     }
 
-    const request = context
-      .switchToHttp()
-      .getRequest<{ headers: { authorization?: string } }>();
+    const request = context.switchToHttp().getRequest<{ headers: { authorization?: string } }>();
     const header = request.headers.authorization;
     if (!header?.startsWith('Bearer ')) {
       throw new UnauthorizedException('Missing service token');

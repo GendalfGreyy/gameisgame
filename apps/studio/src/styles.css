@@ -1,0 +1,29 @@
+:root {
+  color-scheme: dark;
+  --studio-bg: #0f1419;
+  --studio-panel: #1a222c;
+  --studio-border: #2a3542;
+  --studio-ink: #e8eef4;
+  --studio-muted: #8b9aab;
+  --studio-accent: #3ddc97;
+  --studio-viewport: #0a0e12;
+  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: var(--studio-bg);
+  color: var(--studio-ink);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}

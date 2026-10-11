@@ -29,10 +29,9 @@ export function useNearbyEvents(position: { lat: number; lng: number } | null) {
     enabled: Boolean(token && position),
     refetchInterval: 60_000,
     queryFn: () =>
-      apiRequest<NearbyEventsResponse>(
-        `/events/nearby?lat=${position?.lat}&lng=${position?.lng}`,
-        { token },
-      ),
+      apiRequest<NearbyEventsResponse>(`/events/nearby?lat=${position?.lat}&lng=${position?.lng}`, {
+        token,
+      }),
   });
 }
 
@@ -131,8 +130,7 @@ export function useHostQrToken(eventId: string, enabled: boolean) {
       const data = query.state.data;
       return data ? Math.max(data.expiresInSeconds, 1) * 1000 : 5000;
     },
-    queryFn: () =>
-      apiRequest<QrTokenResponse>(`/events/${eventId}/checkin/qr-token`, { token }),
+    queryFn: () => apiRequest<QrTokenResponse>(`/events/${eventId}/checkin/qr-token`, { token }),
   });
 }
 
@@ -141,8 +139,7 @@ export function useEventTemplates() {
   return useQuery({
     queryKey: ['events', 'templates'],
     enabled: Boolean(token),
-    queryFn: () =>
-      apiRequest<{ items: EventTemplate[] }>('/events/templates', { token }),
+    queryFn: () => apiRequest<{ items: EventTemplate[] }>('/events/templates', { token }),
   });
 }
 

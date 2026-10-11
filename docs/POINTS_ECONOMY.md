@@ -2,14 +2,14 @@
 
 All point changes go through `PointsService.award` — never update `User.totalPoints` directly.
 
-| Reason | Amount | Trigger |
-|--------|--------|---------|
-| `check_in` | 50 | Confirmed check-in (GPS dwell or QR) |
-| `event_host` | 100 | Host publishes a new event |
-| `streak_bonus` | 25 | Weekly streak extended |
-| `invite_friend` | 75 | New user signs up via inviter's `start_param` (`ref_<userId>`) |
-| `boost_refund` | varies | Admin/bot refund for failed boost (phase 8+) |
-| `admin_adjustment` | varies | Manual admin correction |
+| Reason             | Amount | Trigger                                                        |
+| ------------------ | ------ | -------------------------------------------------------------- |
+| `check_in`         | 50     | Confirmed check-in (GPS dwell or QR)                           |
+| `event_host`       | 100    | Host publishes a new event                                     |
+| `streak_bonus`     | 25     | Weekly streak extended                                         |
+| `invite_friend`    | 75     | New user signs up via inviter's `start_param` (`ref_<userId>`) |
+| `boost_refund`     | varies | Admin/bot refund for failed boost (phase 8+)                   |
+| `admin_adjustment` | varies | Manual admin correction                                        |
 
 ## Invite flow
 

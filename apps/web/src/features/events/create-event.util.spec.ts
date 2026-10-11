@@ -27,8 +27,7 @@ describe('cloneTimesFromEvent', () => {
     const durationMs = new Date(sourceEnd).getTime() - new Date(sourceStart).getTime();
 
     const cloned = cloneTimesFromEvent(sourceStart, sourceEnd);
-    const clonedDuration =
-      new Date(cloned.endsAt).getTime() - new Date(cloned.startsAt).getTime();
+    const clonedDuration = new Date(cloned.endsAt).getTime() - new Date(cloned.startsAt).getTime();
 
     expect(clonedDuration).toBe(durationMs);
     expect(cloned.startsAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);

@@ -8,9 +8,7 @@ import type { Env } from '../config/env.schema.js';
 export class RedisService implements OnModuleDestroy {
   readonly client: RedisClient;
 
-  constructor(
-    @Inject(ConfigService) private readonly configService: ConfigService<Env, true>,
-  ) {
+  constructor(@Inject(ConfigService) private readonly configService: ConfigService<Env, true>) {
     this.client = new RedisClient(this.configService.get('REDIS_URL', { infer: true }));
   }
 

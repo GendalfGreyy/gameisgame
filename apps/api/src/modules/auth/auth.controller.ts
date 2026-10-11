@@ -1,7 +1,4 @@
-import {
-  refreshTokenRequestSchema,
-  telegramAuthRequestSchema,
-} from '@game-is-game/shared';
+import { refreshTokenRequestSchema, telegramAuthRequestSchema } from '@game-is-game/shared';
 import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
@@ -22,7 +19,9 @@ export class AuthController {
   @Post('telegram')
   authenticateWithTelegram(
     @Body(new ZodValidationPipe(telegramAuthRequestSchema))
-    body: { initData: string },
+    body: {
+      initData: string;
+    },
   ) {
     return this.authService.authenticateWithTelegram(body.initData);
   }
@@ -31,7 +30,9 @@ export class AuthController {
   @Post('refresh')
   refresh(
     @Body(new ZodValidationPipe(refreshTokenRequestSchema))
-    body: { refreshToken: string },
+    body: {
+      refreshToken: string;
+    },
   ) {
     return this.authService.refreshAccessToken(body.refreshToken);
   }

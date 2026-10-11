@@ -6,12 +6,7 @@ import { useAuthStore } from '../auth/store.js';
 import { useMyStreak } from '../social/hooks.js';
 import { AnimatedNumber } from '../../shared/ui/motion.js';
 import { IconSettings } from '../../shared/ui/icons.js';
-import {
-  Avatar,
-  Card,
-  GhostButton,
-  SecondaryButton,
-} from '../../shared/ui/primitives.js';
+import { Avatar, Card, GhostButton, SecondaryButton } from '../../shared/ui/primitives.js';
 
 export function ProfileScreen({
   onOpenFriends,

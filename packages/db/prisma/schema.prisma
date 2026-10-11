@@ -87,6 +87,12 @@ enum ReportTargetType {
   check_in
 }
 
+enum StudioProjectStatus {
+  draft
+  published
+  archived
+}
+
 model User {
   id              String      @id @default(cuid())
   telegramId      BigInt      @unique @map("telegram_id")
@@ -124,6 +130,7 @@ model User {
   referredBy         User?               @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
   referrals          User[]              @relation("UserReferrals")
   referredById       String?             @map("referred_by_id")
+  studioProjects     StudioProject[]
 
   @@index([deletedAt])
   @@index([referredById])
@@ -348,4 +355,26 @@ model AdminAuditLog {
 
   @@index([adminId, createdAt])
   @@map("admin_audit_logs")
+}
+
+/** User-created Mini App games (Creator Studio). Scene JSON is the source of truth. */
+model StudioProject {
+  id          String              @id @default(cuid())
+  ownerId     String              @map("owner_id")
+  title       String
+  description String?
+  status      StudioProjectStatus @default(draft)
+  /** SceneDocument from @game-is-game/shared — validated on write. */
+  scene       Json
+  accentColor String              @default("#3DDC97") @map("accent_color")
+  playCount   Int                 @default(0) @map("play_count")
+  publishedAt DateTime?           @map("published_at")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, updatedAt])
+  @@index([status, publishedAt])
+  @@map("studio_projects")
 }

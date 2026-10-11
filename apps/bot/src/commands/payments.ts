@@ -17,8 +17,7 @@ export function registerPaymentHandlers(bot: Bot) {
       }
       await context.answerPreCheckoutQuery(true);
     } catch (error) {
-      const message =
-        error instanceof ApiClientError ? error.message : 'Payment validation failed';
+      const message = error instanceof ApiClientError ? error.message : 'Payment validation failed';
       await context.answerPreCheckoutQuery(false, message);
     }
   });

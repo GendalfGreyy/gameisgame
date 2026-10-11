@@ -1,4 +1,9 @@
-import type { BoostPlan, CreateBoostRequest, BoostResponse, BoostStatusResponse } from '@game-is-game/shared';
+import type {
+  BoostPlan,
+  CreateBoostRequest,
+  BoostResponse,
+  BoostStatusResponse,
+} from '@game-is-game/shared';
 import {
   BOOST_SCORE_BY_PLAN,
   BOOST_STARS_PRICES,

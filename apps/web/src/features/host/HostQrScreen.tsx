@@ -75,9 +75,7 @@ export function HostQrScreen({ eventId, onBack }: { eventId: string; onBack: () 
             Чек-ин · вход
           </p>
 
-          {qr.isLoading ? (
-            <p className="mt-10 text-white/60">Получаю код…</p>
-          ) : null}
+          {qr.isLoading ? <p className="mt-10 text-white/60">Получаю код…</p> : null}
           {qr.error ? (
             <div className="mt-8">
               <ErrorBanner message={qr.error.message} />
@@ -107,15 +105,18 @@ export function HostQrScreen({ eventId, onBack }: { eventId: string; onBack: () 
 
               {/* Per-character code tiles */}
               <div className="mt-7 flex justify-center gap-1.5" key={qr.data.token}>
-                {qr.data.token.toUpperCase().split('').map((char, index) => (
-                  <span
-                    key={`${char}-${index}`}
-                    className="animate-pop flex h-11 w-9 items-center justify-center rounded-xl bg-white/10 font-mono text-xl font-bold text-white backdrop-blur-sm"
-                    style={{ animationDelay: `${index * 45}ms` }}
-                  >
-                    {char}
-                  </span>
-                ))}
+                {qr.data.token
+                  .toUpperCase()
+                  .split('')
+                  .map((char, index) => (
+                    <span
+                      key={`${char}-${index}`}
+                      className="animate-pop flex h-11 w-9 items-center justify-center rounded-xl bg-white/10 font-mono text-xl font-bold text-white backdrop-blur-sm"
+                      style={{ animationDelay: `${index * 45}ms` }}
+                    >
+                      {char}
+                    </span>
+                  ))}
               </div>
 
               <div className="mt-7 flex items-center justify-center">
@@ -135,8 +136,8 @@ export function HostQrScreen({ eventId, onBack }: { eventId: string; onBack: () 
       </div>
 
       <p className="text-center text-sm leading-relaxed text-gig-muted">
-        Покажи экран на входе — гости сканируют QR или вводят код. Скриншот бесполезен: код
-        живёт 30 секунд.
+        Покажи экран на входе — гости сканируют QR или вводят код. Скриншот бесполезен: код живёт 30
+        секунд.
       </p>
     </section>
   );

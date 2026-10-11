@@ -43,6 +43,13 @@ Thumbs.db
 packages/db/generated/
 packages/db/prisma/*.db
 packages/db/prisma/*.db-journal
+apps/creator-api/generated/
+
+# Playwright
+**/test-results/
+**/playwright-report/
+**/blob-report/
+**/playwright/.cache/
 
 # Secrets / keys
 *.pem

@@ -12,7 +12,10 @@
         "VITE_SENTRY_DSN",
         "VITE_POSTHOG_KEY",
         "VITE_POSTHOG_HOST",
-        "VITE_BOOSTS_ENABLED"
+        "VITE_BOOSTS_ENABLED",
+        "VITE_CREATOR_API_URL",
+        "CREATOR_API_PORT",
+        "CREATOR_DATABASE_URL"
       ]
     },
     "dev": {

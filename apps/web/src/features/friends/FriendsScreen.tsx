@@ -34,10 +34,7 @@ export function FriendsScreen({ onBack }: { onBack: () => void }) {
     <section className="space-y-5">
       <GhostButton onClick={onBack}>← Профиль</GhostButton>
 
-      <PageTitle
-        title="Друзья"
-        subtitle="Друзья поднимают события в выдаче — «там будут свои»."
-      />
+      <PageTitle title="Друзья" subtitle="Друзья поднимают события в выдаче — «там будут свои»." />
 
       {requests.data && requests.data.items.length > 0 ? (
         <div className="space-y-2">

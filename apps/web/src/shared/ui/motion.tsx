@@ -74,7 +74,10 @@ export function ProgressRing({
   const clamped = Math.max(0, Math.min(1, progress));
 
   return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+    <div
+      className="relative inline-flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
       <svg width={size} height={size} className="-rotate-90">
         <circle
           cx={size / 2}
@@ -190,7 +193,10 @@ export function Stagger({
   stepMs?: number;
 }) {
   return (
-    <div className="animate-fade-up" style={{ animationDelay: `${Math.min(index, 10) * stepMs}ms` }}>
+    <div
+      className="animate-fade-up"
+      style={{ animationDelay: `${Math.min(index, 10) * stepMs}ms` }}
+    >
       {children}
     </div>
   );

@@ -1,0 +1,25 @@
+{
+  "name": "@tg-creator/worker",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Asset/publish background worker (Planned G5+).",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "rm -f tsconfig.tsbuildinfo && tsc -p tsconfig.json",
+    "dev": "node --import tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "lint": "echo 'lint runs from root' && exit 0",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.4"
+  }
+}

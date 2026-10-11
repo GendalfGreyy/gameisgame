@@ -114,7 +114,10 @@ export function LeaderboardScreen() {
       ) : null}
 
       {myRank ? (
-        <div className="animate-fade-up rounded-2xl py-1 text-center" style={{ animationDelay: '240ms' }}>
+        <div
+          className="animate-fade-up rounded-2xl py-1 text-center"
+          style={{ animationDelay: '240ms' }}
+        >
           <p className="text-sm text-gig-muted">
             {tab === 'players' ? 'Твоё место:' : 'Твой squad:'}{' '}
             <span className="gig-gradient-text font-extrabold">#{myRank}</span>

@@ -91,7 +91,9 @@ export function SegmentedControl<T extends string>({
               onClick={() => onChange(option.value)}
               className="relative flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded-full px-2 py-1.5"
             >
-              {active ? <span className="msgr-segment-active absolute inset-0 rounded-full" /> : null}
+              {active ? (
+                <span className="msgr-segment-active absolute inset-0 rounded-full" />
+              ) : null}
               <span
                 className="relative text-sm"
                 style={{
@@ -171,13 +173,7 @@ export function ThemeSwitch({
   );
 }
 
-export function PageTitle({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
+export function PageTitle({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="space-y-1">
       <h2 className="text-[26px] font-bold tracking-tight text-gig-ink">{title}</h2>
@@ -201,13 +197,7 @@ export function ErrorBanner({ message }: { message: string }) {
   );
 }
 
-export function EmptyState({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
+export function EmptyState({ title, description }: { title: string; description: string }) {
   return (
     <Card className="bg-gig-surface/60">
       <p className="font-semibold text-gig-ink">{title}</p>
@@ -216,10 +206,7 @@ export function EmptyState({
   );
 }
 
-export function TextInput({
-  className = '',
-  ...props
-}: InputHTMLAttributes<HTMLInputElement>) {
+export function TextInput({ className = '', ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       className={`gig-input w-full rounded-2xl border px-4 py-3 text-[15px] text-gig-ink outline-none transition placeholder:text-gig-muted/70 focus:border-gig-accent focus:ring-2 focus:ring-gig-accent/20 ${className}`}
