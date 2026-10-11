@@ -2,6 +2,16 @@
 
 Формат: дата, версия, изменённые файлы и причина. Любая правка docs/ обязана получить запись здесь — это журнал источника истины.
 
+## 1.1.6 — 2026-10-11 (G4 3D engine)
+
+- `docs/03-ENGINE-ARCHITECTURE.md` §5.1–5.2: новые команды `asset.add/remove` и `batch`; описан 3D-адаптер — `createScene/applyChanges/select/dispose`, `SceneSync` → `SceneBackend`, gizmo на прокси (JSON — единственный источник истины), маршрутизация ввода и конфликт orbit/touch, editor camera vs game camera, рендер по требованию, модели и встроенные `builtin_*`.
+- `docs/02-UX-SCREENS.md` §3–4: реализованное в G4 — вьюпорт, инструменты Q/W/E/R, привязка, «Камера игры», жесты на mobile; World/Local, Tab и resize панелей — Planned/Partial.
+- `docs/04-API-DATA-CONTRACT.md` §4: встроенные `AssetRef` с префиксом `builtin_`.
+- `project-schema`: схема **не менялась** (капсула/конус и `assetRefs` вида `model` уже были в v2), миграция не требуется.
+- `docs/06`: новых API-кодов нет (ошибки команд `ASSET_NOT_FOUND`/`ASSET_EXISTS` — клиентские).
+- Новая зависимость: `playcanvas` 2.23.2 только в `@tg-creator/engine-3d` (движок, требуемый спецификацией).
+- TASKS/IMPLEMENTED: G4 Completed.
+
 ## 1.1.5 — 2026-10-11 (G3 Editor core)
 
 - `docs/03-ENGINE-ARCHITECTURE.md` §5.1: описан фактический `editor-core` — сериализуемые команды с точными inverse, чистое применение, интеграция с `validateProjectDocument`, история с merge-группами, dirty по версии, тикеты сохранения и блокировка при конфликте, соглашение о Transform (градусы, `Rz·Ry·Rx`), SVG-схема вместо viewport до G4.

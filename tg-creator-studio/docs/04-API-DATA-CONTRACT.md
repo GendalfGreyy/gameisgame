@@ -92,6 +92,8 @@ Session — непрозрачный bearer-токен (`Authorization: Bearer t
 
 Нельзя считать загрузку завершенной только потому, что клиент вернул success; worker валидирует и переводит asset в `ready`.
 
+**Встроенные ассеты (G4):** `AssetRef` с ID `builtin_*` (например `{ "id": "builtin_tree", "version": "1", "kind": "model" }`) не загружаются через Asset API — клиент и Player получают их из `@tg-creator/asset-sdk`. Сервер хранит их в `assetRefs` как обычные ссылки; проверка целостности документа одинакова.
+
 ## 5. Blueprint validation
 
 `POST /projects/:id/validate` принимает текущую ревизию или draft, возвращает `errors[]` и `warnings[]` с адресацией `{sceneId, entityId, graphId, nodeId, propertyPath, code, message}`. Publish использует тот же валидатор на сервере плюс контроль доступа, зависимостей и квот.
