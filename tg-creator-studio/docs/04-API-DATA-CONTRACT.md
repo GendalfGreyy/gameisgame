@@ -27,7 +27,7 @@ Session — непрозрачный bearer-токен (`Authorization: Bearer t
 | `GET /projects?cursor=&type=&q=&limit=` | Pageable list, lastEditedAt                            | owner/editor           |
 | `POST /projects`                        | `{title,type,templateId?}` → projectId/revision        | authenticated          |
 | `GET /projects/:id`                     | metadata + current draft revision                      | project reader         |
-| `GET /projects/:id/draft`               | full `ProjectDocument`, revision                       | project reader         |
+| `GET /projects/:id/draft`               | `{projectId,revision,etag,savedAt,document}`           | project reader         |
 | `PUT /projects/:id/draft`               | `{document, baseRevision, mutationId}` → next revision | project editor         |
 | `PATCH /projects/:id/metadata`          | `{title,description,visibility}`                       | project editor         |
 | `POST /projects/:id/duplicate`          | clone → new project                                    | project reader + quota |
@@ -39,13 +39,36 @@ Session — непрозрачный bearer-токен (`Authorization: Bearer t
 
 Для R0 разрешен `PUT` документа с `baseRevision` в transaction. R1 вводит патчи и history journal при необходимости, но не как обязательную преждевременную сложность.
 
+### `GET draft`
+
+`200 {projectId, revision, etag, savedAt, document}`, заголовки `ETag: "rev-<revision>"` и `Cache-Control: no-store`. `document` всегда текущей `schemaVersion` (2): сохранённый документ старой версии мигрируется при чтении (docs/03, §4), в БД он перезаписывается только следующим `PUT`.
+
+### `PUT draft` request
+
+```json
+{
+  "baseRevision": 11,
+  "mutationId": "mut_7f3c9a1e",
+  "document": { "schemaVersion": 2, "...": "..." }
+}
+```
+
+- `baseRevision` — ревизия, от которой клиент начинал правку. Запись — compare-and-swap в транзакции (`UPDATE … WHERE revision = baseRevision`), `revision` растёт на 1, `title` проекта синхронизируется с `document.title`.
+- `mutationId` — `[A-Za-z0-9_-]{8,100}`, генерирует клиент на каждое сохранение. Журнал `draft_mutations` в Postgres (не TTL-кэш) хранит `(projectId, mutationId) → sha256(document), baseRevision, revision, savedAt`. Повтор того же запроса (в т.ч. параллельный и после рестарта сервера) возвращает сохранённый результат без второй записи; тот же `mutationId` с другим документом или `baseRevision` → `409 MUTATION_ID_REUSED`.
+- `document` проходит `parseProjectDocument` (миграция → Zod → целостность). `id`, `ownerId` и `type` должны совпадать с проектом, иначе `422 SCHEMA_INVALID`. Документ старой schemaVersion принимается и сохраняется уже мигрированным.
+- Лимит сериализованного документа — `DRAFT_MAX_BYTES` = 2 MiB → `413 DOCUMENT_TOO_LARGE` (`details.limitBytes`, `details.actualBytes`); тело запроса больше 3 MB отклоняется до разбора тем же кодом.
+- Ошибки документа — `422` с `details.issues[]` (≤ 100, `{code, path, message, sceneId?, entityId?, pageId?, componentId?, graphId?, nodeId?}`): `HIERARCHY_CYCLE`, `GRAPH_BROKEN_REF`, `SCHEMA_INVALID`, `MIGRATION_FAILED`. Неверная форма самого запроса — `422 VALIDATION_FAILED`. При любой ошибке ревизия не меняется.
+- Чужой или удалённый проект → `404 NOT_FOUND`, без сессии → `401`.
+
 ### `PUT draft` response
+
+`200` + заголовок `ETag`:
 
 ```json
 { "projectId": "prj_001", "revision": 12, "etag": "\"rev-12\"", "savedAt": "2026-10-10T10:15:00Z" }
 ```
 
-При конфликте:
+При конфликте (`409`):
 
 ```json
 {
@@ -99,7 +122,7 @@ Session — непрозрачный bearer-токен (`Authorization: Bearer t
 
 ## 8. Пример минимального документа
 
-Отдельный файл: `examples/project-3d.v1.json`. Все поля примерные и должны быть зафиксированы в Zod/JSON Schema. `title` и `ownerId` внутри документа не заменяют права в базе. Graph runtime не обязан присутствовать в пустой сцене.
+Канонический пример текущей версии — `examples/project-3d.v2.json` (проходит `parseProjectDocument`, загружается в dev-БД `pnpm --filter @tg-creator/creator-api db:seed`). `examples/project-3d.v1.json` сохранён как вход для тестов миграции. `title` и `ownerId` внутри документа не заменяют права в базе. Graph runtime не обязан присутствовать в пустой сцене.
 
 ## 9. Сохранение на разных устройствах
 

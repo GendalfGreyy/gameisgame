@@ -8,7 +8,7 @@
 | --------------------------------------------------------------------------------- | --------- | --------------------------------------- |
 | Spec 1.0 body (`docs/01–05`, prompts 01–14, `examples/project-3d.v1.json`)        | Completed | Импортировано из загруженного комплекта |
 | Spec v1.1 upgrade (README, CHANGELOG, docs/06, rules 13–15, DoD, docs/04–05 sync) | Completed | 2026-10-10                              |
-| Runtime / editor code per gates G0+                                               | Partial   | G0, G1 Done; остальные gates Planned    |
+| Runtime / editor code per gates G0+                                               | Partial   | G0–G2 Done; остальные gates Planned     |
 
 ## G0 Infra
 
@@ -16,7 +16,7 @@
 | --------------------------------------------------------- | --------- | --------------------------------------------------------- |
 | `ARCHITECTURE.md` mapping → game-is-game monorepo         | Completed | `apps/creator-api` вместо `apps/api`                      |
 | `packages/creator-shared` (`@tg-creator/shared`) ApiError | Completed | коды из docs/06 + INTERNAL/SERVICE_UNAVAILABLE            |
-| `packages/project-schema` Zod v1 + roundtrip example      | Completed | мигратор stub (только v1)                                 |
+| `packages/project-schema` Zod v1 + roundtrip example      | Replaced  | схема v2 и мигратор v1→v2 — см. G2                        |
 | Planned stubs: editor-core…ui-kit                         | Completed | `PACKAGE_STATUS = 'Planned'`                              |
 | `apps/studio` editor shell                                | Replaced  | заменён реальными экранами G1 (фейковая иерархия удалена) |
 | `apps/player` player shell (no editor-core)               | Completed |                                                           |
@@ -53,6 +53,23 @@
 | Railway: `creator-api` + `creator-studio` (cozy-youthfulness)            | Completed | schema `creator` в postgis; меню бота → creator-studio           |
 | Visual design «Мастерская» (tokens, fonts, motion, content-browser list) | Completed | контраст пар проверяется unit-тестом; Telegram-палитра поверх    |
 | Real-device check inside Telegram clients                                | Partial   | агент не открывает клиенты Telegram; нужна ручная проверка (G10) |
+
+## G2 Project schema
+
+| Item                                                                        | Status    | Notes                                                                   |
+| --------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------- |
+| `ProjectDocument` v2: strict Zod, discriminated unions компонентов/виджетов | Completed | `packages/project-schema/src/v2.ts`; канонический порядок ключей        |
+| Целостность: ID, иерархия, циклы, ссылки на граф/страницы/assets            | Completed | `validateProjectDocument`, ≤ 100 issues с адресацией                    |
+| Миграция v1 → v2 (чистая) + golden fixtures                                 | Completed | v1 заморожен; новее сервера → `MIGRATION_FAILED`                        |
+| Roundtrip serialize → deserialize → serialize                               | Completed | побайтно для примера, шаблонов и мигрированных фикстур                  |
+| `examples/project-3d.v2.json` + dev seed (`db:seed`)                        | Completed | v1-пример — вход тестов миграции                                        |
+| `GET draft`: `revision`, `etag`, `savedAt`, миграция при чтении             | Completed | `ETag: "rev-N"`, `Cache-Control: no-store`                              |
+| `PUT draft`: CAS `baseRevision` в транзакции                                | Completed | 409 `REVISION_CONFLICT` с `expected/actualRevision`                     |
+| Идемпотентность `mutationId` (Postgres `draft_mutations`)                   | Completed | повтор/параллельный повтор — без двойного эффекта; `MUTATION_ID_REUSED` |
+| 422 для parentId/циклов/дубликатов/битых ссылок, 413 по размеру             | Completed | ревизия не меняется; `DOCUMENT_TOO_LARGE` (2 MiB / 3 MB тело)           |
+| Перечитывание проекта после перезапуска Node-сервера                        | Completed | int-тест останавливает и поднимает приложение                           |
+| Studio `saveDraft` клиент                                                   | Partial   | вызывающий редактор/автосейв — G3/G5                                    |
+| Ретеншн журнала `draft_mutations`                                           | Planned   | G11                                                                     |
 
 ## Product vertical (R0/R1)
 
