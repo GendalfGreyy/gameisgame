@@ -3,12 +3,15 @@ import {
   canRedo,
   canUndo,
   createEditorSession,
+  createModelEntityCommand,
+  defaultPosition,
   getEntity,
   isDirty,
   presetsFor,
   saveIndicator,
   type EditorSession,
 } from '@tg-creator/editor-core';
+import { BUILTIN_MODELS, builtinModelRef, type BuiltinModel } from '@tg-creator/asset-sdk';
 import { parseProjectDocument, type ProjectDocument, type Vec3 } from '@tg-creator/project-schema';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
@@ -39,7 +42,7 @@ import { saveDraft } from './save.js';
 import { SaveStatus } from './SaveStatus.js';
 import { Sheet } from './Sheet.js';
 import { useEditorShortcuts } from './shortcuts.js';
-import { Viewport } from './Viewport.js';
+import { SceneView } from './Viewport3D.js';
 import './editor.css';
 
 const DESKTOP_QUERY = '(min-width: 1024px)';
@@ -260,8 +263,11 @@ function Workspace({ projectId }: { projectId: string }) {
       },
       deselect: () => session.select([]),
       focus: () => setFocusToken((token) => token + 1),
-      toolSelect: () => setTool('select'),
-      toolMove: () => setTool('move'),
+      tool: (next: EditorTool) => {
+        if (next === 'select' || next === 'move' || session.getState().document.type === 'game3d') {
+          setTool(next);
+        }
+      },
     }),
     [session, save, requestDelete],
   );
@@ -346,12 +352,18 @@ function HistoryButtons() {
   );
 }
 
+const TOOLS: { id: EditorTool; label: string; icon: string; key: string; only3d: boolean }[] = [
+  { id: 'select', label: 'Выбор', icon: '↖', key: 'Q', only3d: false },
+  { id: 'move', label: 'Перемещение', icon: '✥', key: 'W', only3d: false },
+  { id: 'rotate', label: 'Поворот', icon: '⟳', key: 'E', only3d: true },
+  { id: 'scale', label: 'Масштаб', icon: '⤡', key: 'R', only3d: true },
+];
+
 function ToolButtons() {
   const ui = useEditorUi();
-  const tools: { id: EditorTool; label: string; key: string }[] = [
-    { id: 'select', label: 'Выбор', key: 'Q' },
-    { id: 'move', label: 'Перемещение', key: 'W' },
-  ];
+  const is3d = useEditorState((state) => state.document.type === 'game3d');
+  const tools = TOOLS.filter((tool) => is3d || !tool.only3d);
+  const compact = ui.layout === 'mobile' && is3d;
   return (
     <div className="segmented ed-tools" role="radiogroup" aria-label="Инструмент">
       {tools.map((tool) => (
@@ -362,9 +374,10 @@ function ToolButtons() {
           aria-checked={ui.tool === tool.id}
           className={`segmented__item${ui.tool === tool.id ? ' is-active' : ''}`}
           title={ui.layout === 'desktop' ? `${tool.label} (${tool.key})` : undefined}
+          aria-label={compact ? tool.label : undefined}
           onClick={() => ui.setTool(tool.id)}
         >
-          {tool.label}
+          {compact ? <span aria-hidden="true">{tool.icon}</span> : tool.label}
         </button>
       ))}
     </div>
@@ -485,6 +498,32 @@ function AddMenu({ onDone, inline = false }: { onDone?: () => void; inline?: boo
   const session = useSession();
   const ui = useEditorUi();
   const projectType = useEditorState((state) => state.document.type);
+  const itemClass = inline ? 'ed-add-grid__item' : undefined;
+
+  /** 3D objects rest on the ground at the viewport centre; 2D ones use the centre as is. */
+  const placement = (preset: Parameters<typeof defaultPosition>[1]): Vec3 => {
+    const [x, y, z] = ui.placementRef.current;
+    if (projectType !== 'game3d') {
+      return [x, y, z];
+    }
+    return [x, defaultPosition(session.getState().document, preset)[1], z];
+  };
+
+  const addModel = (model: BuiltinModel) => {
+    const state = session.getState();
+    if (state.sceneId === null) {
+      return;
+    }
+    const asset = builtinModelRef(model);
+    const { command, entityId } = createModelEntityCommand(
+      state.document,
+      { sceneId: state.sceneId, name: model.label, position: placement('model') },
+      asset,
+      session.ids,
+    );
+    session.dispatch(command, { label: `Добавить «${model.label}»`, select: [entityId] });
+  };
+
   return (
     <div className={inline ? 'ed-add-grid' : 'ed-menu'} role="menu" aria-label="Добавить объект">
       {presetsFor(projectType).map((preset) => (
@@ -492,15 +531,36 @@ function AddMenu({ onDone, inline = false }: { onDone?: () => void; inline?: boo
           key={preset.id}
           type="button"
           role="menuitem"
-          className={inline ? 'ed-add-grid__item' : undefined}
+          className={itemClass}
           onClick={() => {
-            addEntity(session, preset.id, { position: ui.placementRef.current });
+            addEntity(session, preset.id, { position: placement(preset.id) });
             onDone?.();
           }}
         >
           {preset.label}
         </button>
       ))}
+      {projectType === 'game3d' ? (
+        <>
+          <p className="ed-menu__section" role="presentation">
+            Модели
+          </p>
+          {BUILTIN_MODELS.map((model) => (
+            <button
+              key={model.id}
+              type="button"
+              role="menuitem"
+              className={itemClass}
+              onClick={() => {
+                addModel(model);
+                onDone?.();
+              }}
+            >
+              {model.label}
+            </button>
+          ))}
+        </>
+      ) : null}
     </div>
   );
 }
@@ -562,7 +622,7 @@ function DesktopLayout({ onBack, onSave }: { onBack: () => void; onSave: () => v
         <Hierarchy />
       </aside>
       <main className="ed-center">
-        <Viewport />
+        <SceneView />
       </main>
       <aside className="ed-pane ed-pane--right" aria-label="Инспектор">
         <h2 className="ed-pane__title">Инспектор</h2>
@@ -686,7 +746,7 @@ function MobileLayout({
       </header>
       <ConflictBanner projectId={projectId} />
       <main className="ed-mcanvas">
-        <Viewport />
+        <SceneView />
         <div className="ed-mcanvas__tools">
           <ToolButtons />
         </div>

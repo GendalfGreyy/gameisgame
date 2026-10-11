@@ -7,6 +7,7 @@ import {
   componentProperties,
   getEntity,
   setComponentEnabledCommand,
+  setMeshModelCommand,
   updateComponentCommand,
   type PropertyDescriptor,
 } from '@tg-creator/editor-core';
@@ -16,6 +17,7 @@ import {
   type ProjectDocument,
   type SceneEntity,
 } from '@tg-creator/project-schema';
+import { BUILTIN_MODELS, builtinModelRef, findBuiltinModel } from '@tg-creator/asset-sdk';
 import { useState } from 'react';
 
 import { renameEntity, setEntityEnabled } from './actions.js';
@@ -39,15 +41,20 @@ function PropertyControl({
   component,
   document,
   update,
+  endLive,
+  setModel,
 }: {
   descriptor: PropertyDescriptor;
   component: ComponentRecord;
   document: ProjectDocument;
-  update: (patch: Record<string, unknown>, label: string) => boolean;
+  update: (patch: Record<string, unknown>, label: string, mergeKey?: string) => boolean;
+  endLive: () => void;
+  setModel: (assetId: string | null) => boolean;
 }) {
   const value = readField(component, descriptor.key);
   const { control, label } = descriptor;
   const commit = (next: unknown) => update({ [descriptor.key]: next }, label);
+  const testId = `prop-${component.type}-${descriptor.key}`;
 
   switch (control.kind) {
     case 'vec3':
@@ -76,7 +83,19 @@ function PropertyControl({
       ) : null;
     case 'color':
       return typeof value === 'string' ? (
-        <ColorField label={label} value={value} onCommit={commit} />
+        <ColorField
+          label={label}
+          value={value}
+          testId={testId}
+          onCommit={(next, live) =>
+            update(
+              { [descriptor.key]: next },
+              label,
+              live ? `color-${component.id}-${descriptor.key}` : undefined,
+            )
+          }
+          onLiveEnd={endLive}
+        />
       ) : null;
     case 'boolean':
       return typeof value === 'boolean' ? (
@@ -90,6 +109,7 @@ function PropertyControl({
         <SelectField
           label={label}
           value={value}
+          testId={testId}
           options={control.options}
           onCommit={(next) => {
             if (
@@ -103,6 +123,30 @@ function PropertyControl({
         />
       );
     case 'asset': {
+      if (control.assetKind === 'model') {
+        const uploaded = document.assetRefs.filter(
+          (asset) => asset.kind === 'model' && !findBuiltinModel(asset.id),
+        );
+        return (
+          <SelectField
+            label={label}
+            value={typeof value === 'string' ? value : ''}
+            testId={testId}
+            options={[
+              { value: '', label: 'Нет — примитив' },
+              ...BUILTIN_MODELS.map((model) => ({
+                value: model.id,
+                label: `${model.label} (встроенная)`,
+              })),
+              ...uploaded.map((asset) => ({
+                value: asset.id,
+                label: `${asset.id} · v${asset.version}`,
+              })),
+            ]}
+            onCommit={(next) => setModel(next === '' ? null : next)}
+          />
+        );
+      }
       const assets = document.assetRefs.filter((asset) => asset.kind === control.assetKind);
       return (
         <SelectField
@@ -150,10 +194,29 @@ function ComponentSection({
   const [menuOpen, setMenuOpen] = useState(false);
   const title = COMPONENT_LABELS[component.type];
 
-  const update = (patch: Record<string, unknown>, label: string) =>
+  const update = (patch: Record<string, unknown>, label: string, mergeKey?: string) =>
     session.dispatch(updateComponentCommand(sceneId, entity.id, component, patch), {
       label: `${title}: ${label} — «${entity.name}»`,
+      ...(mergeKey ? { mergeKey } : {}),
     }).ok;
+
+  const setModel = (assetId: string | null) => {
+    const builtin = assetId ? findBuiltinModel(assetId) : undefined;
+    const ref = builtin
+      ? builtinModelRef(builtin)
+      : (document.assetRefs.find((asset) => asset.id === assetId) ?? null);
+    const command = setMeshModelCommand(document, sceneId, entity.id, assetId ? ref : null);
+    if (!command || (assetId && !ref)) {
+      return false;
+    }
+    return session.dispatch(command, {
+      label: `${title}: ${ref ? `модель «${builtin?.label ?? ref.id}»` : 'примитив'} — «${entity.name}»`,
+    }).ok;
+  };
+
+  const usesModel =
+    component.type === 'material' &&
+    entity.components.some((item) => item.type === 'mesh' && item.data.assetId !== null);
 
   const replaceData = (data: unknown, label: string) =>
     session.dispatch(
@@ -268,6 +331,9 @@ function ComponentSection({
         </div>
       </header>
       <div className="ed-comp__body">
+        {usesModel ? (
+          <p className="ed-comp__note muted">Модель использует свои материалы из файла.</p>
+        ) : null}
         {componentProperties(component).map((descriptor) => (
           <PropertyControl
             key={descriptor.key}
@@ -275,6 +341,8 @@ function ComponentSection({
             component={component}
             document={document}
             update={update}
+            endLive={() => session.closeMergeGroup()}
+            setModel={setModel}
           />
         ))}
       </div>
@@ -338,8 +406,8 @@ export function Inspector() {
         <p>Ничего не выбрано.</p>
         <p className="muted">
           {ui.layout === 'desktop'
-            ? 'Выберите объект в иерархии или на схеме сцены.'
-            : 'Коснитесь объекта на схеме или откройте «Объекты».'}
+            ? 'Выберите объект в иерархии или в сцене.'
+            : 'Коснитесь объекта в сцене или откройте «Объекты».'}
         </p>
       </div>
     );

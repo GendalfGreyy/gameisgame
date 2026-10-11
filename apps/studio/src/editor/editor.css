@@ -756,8 +756,13 @@
 }
 
 .ed-color__hex {
-  color: var(--ui-muted);
-  font-size: var(--fs-xs);
+  width: 92px;
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+}
+
+.ed-color__hex.is-invalid {
+  border-color: var(--ui-danger);
 }
 
 .ed-switch {
@@ -1015,6 +1020,70 @@
   border: 1px solid var(--ui-border);
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--ui-surface) 92%, transparent);
+}
+
+/* ---------- Viewport (3D) ---------- */
+
+.ed-viewport3d__host {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.ed-viewport3d__host.is-tool-select {
+  cursor: default;
+}
+
+.ed-viewport3d__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  touch-action: none;
+}
+
+.ed-viewport3d__host.is-game {
+  box-shadow: inset 0 0 0 2px var(--ui-success);
+}
+
+.ed-viewport3d__loading,
+.ed-viewport__fallback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--radius-sm);
+  background: var(--ui-surface);
+  color: var(--ui-muted);
+  font-size: var(--fs-sm);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ed-viewport__fallback {
+  top: auto;
+  bottom: 48px;
+  transform: translateX(-50%);
+  color: var(--ui-warning);
+}
+
+.ed-menu__section {
+  margin: var(--space-2) 0 var(--space-1);
+  padding: 0 var(--space-3);
+  color: var(--ui-muted);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ed-add-grid .ed-menu__section {
+  grid-column: 1 / -1;
+  padding: 0;
 }
 
 /* ---------- Mobile ---------- */
