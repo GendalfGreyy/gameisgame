@@ -50,6 +50,7 @@
 | Studio S18 Settings: тема, плотность, аккаунт, выход                  | Completed | privacy/render/team — в соответствующих gates                    |
 | Navigation: sidebar ≥768 / bottom nav <768, Telegram BackButton       | Completed |                                                                  |
 | Tests: unit, int (Postgres), Playwright e2e desktop + mobile          | Completed | CI job `creator-integration`                                     |
+| Railway: `creator-api` + `creator-studio` (cozy-youthfulness)         | Completed | schema `creator` в postgis; меню бота → creator-studio           |
 | Real-device check inside Telegram clients                             | Partial   | агент не открывает клиенты Telegram; нужна ручная проверка (G10) |
 
 ## Product vertical (R0/R1)
