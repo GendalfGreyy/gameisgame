@@ -36,35 +36,39 @@ export type TelegramThemeParams = {
   section_separator_color?: string;
 };
 
-/** Design tokens from docs/02 §9 (neutral dark + violet accent). */
+/**
+ * "Мастерская" palette (docs/02 §9): warm graphite with a single acid-lime signal.
+ * Every text/surface pair is checked to WCAG AA in index.spec.ts.
+ */
 export const DARK_TOKENS: ThemeTokens = {
-  bg: '#111622',
-  sidebar: '#1E2637',
-  surface: '#2B3547',
-  border: '#36425A',
-  ink: '#EEF1F8',
-  muted: '#A3ADC2',
-  accent: '#776BFF',
-  accentFill: '#6C5FF5',
-  accentInk: '#FFFFFF',
-  success: '#2CBF87',
-  warning: '#F4B454',
-  danger: '#E76672',
+  bg: '#0E0E0C',
+  sidebar: '#151513',
+  surface: '#1C1C19',
+  border: '#33322C',
+  ink: '#F3F1EA',
+  muted: '#A6A398',
+  accent: '#D4F24A',
+  accentFill: '#D4F24A',
+  accentInk: '#12130B',
+  success: '#5AD7AE',
+  warning: '#F5B544',
+  danger: '#FF7A6B',
 };
 
+/** Paper variant: lime cannot carry text on light paper, so it moves onto an ink-black fill. */
 export const LIGHT_TOKENS: ThemeTokens = {
-  bg: '#F5F6FA',
-  sidebar: '#FFFFFF',
+  bg: '#F3F1EA',
+  sidebar: '#EAE7DE',
   surface: '#FFFFFF',
-  border: '#DCE0EA',
-  ink: '#161B26',
-  muted: '#5B6476',
-  accent: '#5B4EF0',
-  accentFill: '#5B4EF0',
-  accentInk: '#FFFFFF',
-  success: '#17875F',
-  warning: '#9A6100',
-  danger: '#C23B49',
+  border: '#D6D2C6',
+  ink: '#171713',
+  muted: '#5C594F',
+  accent: '#4D6600',
+  accentFill: '#191A14',
+  accentInk: '#D4F24A',
+  success: '#0F7052',
+  warning: '#8F5A00',
+  danger: '#B5342A',
 };
 
 export const DEFAULT_THEME_PREFERENCE: ThemePreference = 'telegram';
