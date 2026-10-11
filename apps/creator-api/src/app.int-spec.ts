@@ -158,7 +158,7 @@ describe('projects', () => {
 
     const draft = await call('GET', `/api/v1/projects/${projectId}/draft`, { token });
     expect(draft.status).toBe(200);
-    expect(draft.body.document).toMatchObject({ id: projectId, schemaVersion: 1, type: 'game3d' });
+    expect(draft.body.document).toMatchObject({ id: projectId, schemaVersion: 2, type: 'game3d' });
   });
 
   it('hides project A from user B as NOT_FOUND', async () => {

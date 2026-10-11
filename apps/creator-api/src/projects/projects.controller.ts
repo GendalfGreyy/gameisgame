@@ -7,16 +7,21 @@ import {
   Inject,
   Param,
   Post,
+  Put,
   Query,
+  Res,
 } from '@nestjs/common';
 import {
   createProjectRequestSchema,
   listProjectsQuerySchema,
+  saveDraftRequestSchema,
   type CreateProjectResponse,
   type ListProjectsResponse,
   type ProjectDetail,
   type ProjectDraftResponse,
+  type SaveDraftResponse,
 } from '@tg-creator/shared';
+import type { Response } from 'express';
 
 import { CurrentAuth } from '../auth/session.guard.js';
 import type { AuthContext } from '../auth/session.service.js';
@@ -55,8 +60,31 @@ export class ProjectsController {
   }
 
   @Get(':id/draft')
-  draft(@CurrentAuth() auth: AuthContext, @Param('id') id: string): Promise<ProjectDraftResponse> {
-    return this.projects.getDraft(auth.userId, id);
+  async draft(
+    @CurrentAuth() auth: AuthContext,
+    @Param('id') id: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<ProjectDraftResponse> {
+    const draft = await this.projects.getDraft(auth.userId, id);
+    response.setHeader('ETag', draft.etag);
+    response.setHeader('Cache-Control', 'no-store');
+    return draft;
+  }
+
+  @Put(':id/draft')
+  async saveDraft(
+    @CurrentAuth() auth: AuthContext,
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<SaveDraftResponse> {
+    const saved = await this.projects.saveDraft(
+      auth.userId,
+      id,
+      parseRequest(saveDraftRequestSchema, body),
+    );
+    response.setHeader('ETag', saved.etag);
+    return saved;
   }
 
   @Post(':id/duplicate')
