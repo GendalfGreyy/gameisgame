@@ -2,7 +2,7 @@
   "name": "@tg-creator/editor-core",
   "version": "0.0.0",
   "private": true,
-  "description": "Editor command bus, selection, history (Planned G3)",
+  "description": "Editor command bus, undo/redo history, selection and save state (G3).",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,7 +20,9 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@tg-creator/project-schema": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "^5.7.2",
     "vitest": "^3.0.4"
