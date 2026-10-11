@@ -1,8 +1,10 @@
 import {
+  assetRefSchema,
   componentRecordSchema,
   sceneEntitySchema,
   validateProjectDocument,
   NAME_MAX,
+  type AssetRef,
   type ComponentRecord,
   type DocumentIssue,
   type ProjectDocument,
@@ -62,7 +64,11 @@ export type EditorCommand =
       /** Full replacement of `data`; validated against the component's Zod schema. */
       data: unknown;
       enabled: boolean;
-    };
+    }
+  | { type: 'asset.add'; index: number; asset: AssetRef }
+  | { type: 'asset.remove'; assetId: string }
+  /** Several commands as one Undo step, e.g. "register a model and assign it to a mesh". */
+  | { type: 'batch'; commands: EditorCommand[] };
 
 export type EditorCommandType = EditorCommand['type'];
 
@@ -70,6 +76,8 @@ export type CommandErrorCode =
   | 'SCENE_NOT_FOUND'
   | 'ENTITY_NOT_FOUND'
   | 'COMPONENT_NOT_FOUND'
+  | 'ASSET_NOT_FOUND'
+  | 'ASSET_EXISTS'
   | 'INVALID_PARENT'
   | 'REPARENT_CYCLE'
   | 'DUPLICATE_ID'
@@ -387,6 +395,60 @@ function applyComponentUpdate(
   };
 }
 
+function applyAssetAdd(
+  document: ProjectDocument,
+  command: Extract<EditorCommand, { type: 'asset.add' }>,
+): ApplyResult {
+  const parsed = assetRefSchema.safeParse(command.asset);
+  if (!parsed.success) {
+    return fail('INVALID_DATA', parsed.error.issues[0]?.message ?? 'Некорректный ассет');
+  }
+  if (document.assetRefs.some((asset) => asset.id === parsed.data.id)) {
+    return fail('ASSET_EXISTS', 'Ассет уже подключён к проекту');
+  }
+  return {
+    ok: true,
+    document: { ...document, assetRefs: insertAt(document.assetRefs, command.index, parsed.data) },
+    inverse: { type: 'asset.remove', assetId: parsed.data.id },
+  };
+}
+
+function applyAssetRemove(
+  document: ProjectDocument,
+  command: Extract<EditorCommand, { type: 'asset.remove' }>,
+): ApplyResult {
+  const index = document.assetRefs.findIndex((asset) => asset.id === command.assetId);
+  const asset = document.assetRefs[index];
+  if (!asset) {
+    return fail('ASSET_NOT_FOUND', 'Ассет не найден');
+  }
+  return {
+    ok: true,
+    document: {
+      ...document,
+      assetRefs: document.assetRefs.filter((item) => item.id !== command.assetId),
+    },
+    inverse: { type: 'asset.add', index, asset },
+  };
+}
+
+function applyBatch(
+  document: ProjectDocument,
+  command: Extract<EditorCommand, { type: 'batch' }>,
+): ApplyResult {
+  let current = document;
+  const inverses: EditorCommand[] = [];
+  for (const step of command.commands) {
+    const result = applyUnchecked(current, step);
+    if (!result.ok) {
+      return result;
+    }
+    current = result.document;
+    inverses.unshift(result.inverse);
+  }
+  return { ok: true, document: current, inverse: { type: 'batch', commands: inverses } };
+}
+
 function applyUnchecked(document: ProjectDocument, command: EditorCommand): ApplyResult {
   switch (command.type) {
     case 'entity.insert':
@@ -405,6 +467,12 @@ function applyUnchecked(document: ProjectDocument, command: EditorCommand): Appl
       return applyComponentRemove(document, command);
     case 'component.update':
       return applyComponentUpdate(document, command);
+    case 'asset.add':
+      return applyAssetAdd(document, command);
+    case 'asset.remove':
+      return applyAssetRemove(document, command);
+    case 'batch':
+      return applyBatch(document, command);
   }
 }
 

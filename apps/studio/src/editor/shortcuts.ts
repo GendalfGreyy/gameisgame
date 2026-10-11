@@ -9,9 +9,14 @@ export type ShortcutHandlers = {
   rename: () => void;
   deselect: () => void;
   focus: () => void;
-  toolSelect: () => void;
-  toolMove: () => void;
+  tool: (tool: 'select' | 'move' | 'rotate' | 'scale') => void;
 };
+
+const TOOL_KEYS = { q: 'select', w: 'move', e: 'rotate', r: 'scale' } as const;
+
+function isToolKey(key: string): key is keyof typeof TOOL_KEYS {
+  return key in TOOL_KEYS;
+}
 
 function isTextTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) {
@@ -69,10 +74,8 @@ export function useEditorShortcuts(enabled: boolean, handlers: ShortcutHandlers)
         handlers.deselect();
       } else if (key === 'f') {
         handlers.focus();
-      } else if (key === 'q') {
-        handlers.toolSelect();
-      } else if (key === 'w') {
-        handlers.toolMove();
+      } else if (isToolKey(key)) {
+        handlers.tool(TOOL_KEYS[key]);
       } else {
         handled = false;
       }

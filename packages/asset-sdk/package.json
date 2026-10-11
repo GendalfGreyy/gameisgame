@@ -2,7 +2,7 @@
   "name": "@tg-creator/asset-sdk",
   "version": "0.0.0",
   "private": true,
-  "description": "Asset upload/resolve SDK (Planned G5)",
+  "description": "Asset references and built-in GLB model library (G4); upload — G5",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,7 +20,9 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@tg-creator/project-schema": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "^5.7.2",
     "vitest": "^3.0.4"

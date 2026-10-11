@@ -172,16 +172,51 @@ export function NumberField(props: NumberInputProps) {
   );
 }
 
+const HEX = /^#?([0-9A-Fa-f]{6})$/;
+
+/**
+ * Swatch drags commit live but merge into one Undo step (`live: true`), ended on blur;
+ * the hex field commits on Enter/blur like number fields.
+ */
 export function ColorField({
   label,
   value,
   onCommit,
+  onLiveEnd,
+  testId,
 }: {
   label: string;
   value: string;
-  onCommit: Commit<string>;
+  onCommit: (value: string, live: boolean) => boolean;
+  onLiveEnd?: () => void;
+  testId?: string;
 }) {
   const id = useId();
+  const [draft, setDraft] = useState(value.toUpperCase());
+  const [editing, setEditing] = useState(false);
+  const [invalid, setInvalid] = useState(false);
+
+  useEffect(() => {
+    if (!editing) {
+      setDraft(value.toUpperCase());
+      setInvalid(false);
+    }
+  }, [value, editing]);
+
+  const commitHex = () => {
+    setEditing(false);
+    const match = HEX.exec(draft.trim());
+    if (!match?.[1]) {
+      setInvalid(true);
+      return;
+    }
+    const next = `#${match[1].toUpperCase()}`;
+    setInvalid(false);
+    if (next !== value.toUpperCase()) {
+      setInvalid(!onCommit(next, false));
+    }
+  };
+
   return (
     <div className="ed-prop">
       <label className="ed-prop__label" htmlFor={id}>
@@ -193,9 +228,40 @@ export function ColorField({
           type="color"
           className="ed-color__swatch"
           value={value.toLowerCase()}
-          onChange={(event) => onCommit(event.target.value.toUpperCase())}
+          onChange={(event) => onCommit(event.target.value.toUpperCase(), true)}
+          onBlur={() => onLiveEnd?.()}
         />
-        <span className="mono ed-color__hex">{value.toUpperCase()}</span>
+        <input
+          className={`ed-num mono ed-color__hex${invalid ? ' is-invalid' : ''}`}
+          type="text"
+          autoComplete="off"
+          spellCheck={false}
+          enterKeyHint="done"
+          maxLength={7}
+          aria-label={`${label}, HEX`}
+          aria-invalid={invalid || undefined}
+          data-testid={testId}
+          value={draft}
+          onFocus={(event) => {
+            setEditing(true);
+            event.currentTarget.select();
+          }}
+          onChange={(event) => {
+            setEditing(true);
+            setDraft(event.target.value);
+          }}
+          onBlur={commitHex}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.currentTarget.blur();
+            } else if (event.key === 'Escape') {
+              setDraft(value.toUpperCase());
+              setInvalid(false);
+              setEditing(false);
+              event.currentTarget.blur();
+            }
+          }}
+        />
       </div>
     </div>
   );
@@ -230,12 +296,14 @@ export function SelectField({
   options,
   onCommit,
   disabled,
+  testId,
 }: {
   label: string;
   value: string;
   options: readonly { value: string; label: string }[];
   onCommit: Commit<string>;
   disabled?: boolean;
+  testId?: string;
 }) {
   const id = useId();
   return (
@@ -248,6 +316,7 @@ export function SelectField({
         className="ed-select"
         value={value}
         disabled={disabled}
+        data-testid={testId}
         onChange={(event) => onCommit(event.target.value)}
       >
         {options.map((option) => (

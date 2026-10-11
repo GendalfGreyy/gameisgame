@@ -1,5 +1,6 @@
 import {
   COMPONENT_DEFAULTS,
+  type AssetRef,
   type ComponentData,
   type ComponentRecord,
   type ComponentType,
@@ -28,6 +29,8 @@ export type EntityPresetId =
   | 'sphere'
   | 'plane'
   | 'cylinder'
+  | 'capsule'
+  | 'cone'
   | 'pointLight'
   | 'directionalLight'
   | 'camera'
@@ -45,6 +48,8 @@ export const ENTITY_PRESETS: readonly EntityPreset[] = [
   { id: 'sphere', label: 'Сфера', projectTypes: ['game3d'] },
   { id: 'plane', label: 'Плоскость', projectTypes: ['game3d'] },
   { id: 'cylinder', label: 'Цилиндр', projectTypes: ['game3d'] },
+  { id: 'capsule', label: 'Капсула', projectTypes: ['game3d'] },
+  { id: 'cone', label: 'Конус', projectTypes: ['game3d'] },
   { id: 'pointLight', label: 'Точечный свет', projectTypes: ['game3d'] },
   { id: 'directionalLight', label: 'Направленный свет', projectTypes: ['game3d'] },
   { id: 'camera', label: 'Камера', projectTypes: ['game3d', 'game2d'] },
@@ -81,6 +86,10 @@ function presetComponents(
       return mesh('plane');
     case 'cylinder':
       return mesh('cylinder');
+    case 'capsule':
+      return mesh('capsule');
+    case 'cone':
+      return mesh('cone');
     case 'pointLight':
       return [
         transform,
@@ -102,6 +111,14 @@ function presetComponents(
     case 'sprite':
       return [transform, componentRecord(ids, 'sprite', COMPONENT_DEFAULTS.sprite)];
   }
+}
+
+/** Where a new root object sits by default: 3D primitives rest on the ground (y = 0). */
+export function defaultPosition(document: ProjectDocument, preset: EntityPresetId | 'model'): Vec3 {
+  if (document.type !== 'game3d' || preset === 'plane' || preset === 'model') {
+    return [0, 0, 0];
+  }
+  return preset === 'capsule' ? [0, 1, 0] : [0, 0.5, 0];
 }
 
 function presetLabel(preset: EntityPresetId): string {
@@ -157,8 +174,7 @@ export function createEntityCommand(
       input.preset,
       document.type,
       ids,
-      input.position ??
-        (document.type === 'game3d' && input.preset !== 'plane' ? [0, 0.5, 0] : [0, 0, 0]),
+      input.position ?? defaultPosition(document, input.preset),
     ),
   };
   return {
@@ -318,5 +334,84 @@ export function addComponentCommand(
     index: entity.components.length,
     // Same pattern as componentRecord(): Zod re-validates the record before it is stored.
     component: { id: ids('cmp'), type, enabled: true, data } as ComponentRecord,
+  };
+}
+
+function ensureAssetCommands(document: ProjectDocument, asset: AssetRef): EditorCommand[] {
+  return document.assetRefs.some((existing) => existing.id === asset.id)
+    ? []
+    : [{ type: 'asset.add', index: document.assetRefs.length, asset }];
+}
+
+/**
+ * Points a mesh at a model asset (or back at its primitive with `null`), registering the
+ * AssetRef in the document first when needed — one Undo step.
+ */
+export function setMeshModelCommand(
+  document: ProjectDocument,
+  sceneId: string,
+  entityId: string,
+  asset: AssetRef | null,
+): EditorCommand | null {
+  const scene = findScene(document, sceneId);
+  const entity = scene ? getEntity(scene, entityId) : undefined;
+  const mesh = entity ? findComponent(entity, 'mesh') : undefined;
+  if (!mesh) {
+    return null;
+  }
+  const update = updateComponentCommand(sceneId, entityId, mesh, { assetId: asset?.id ?? null });
+  if (!asset) {
+    return update;
+  }
+  return { type: 'batch', commands: [...ensureAssetCommands(document, asset), update] };
+}
+
+export type CreateModelEntityInput = {
+  sceneId: string;
+  name: string;
+  parentId?: string | null;
+  position?: Vec3;
+};
+
+/** New object that renders a model asset; the AssetRef is added in the same Undo step. */
+export function createModelEntityCommand(
+  document: ProjectDocument,
+  input: CreateModelEntityInput,
+  asset: AssetRef,
+  ids: IdGenerator,
+): { command: EditorCommand; entityId: string } {
+  const parentId = input.parentId ?? null;
+  const scene = findScene(document, input.sceneId);
+  const siblings = scene ? siblingIds(scene, parentId) : [];
+  const entity: SceneEntity = {
+    id: ids('ent'),
+    name: uniqueSiblingName(document, input.sceneId, parentId, input.name),
+    parentId,
+    childIds: [],
+    enabled: true,
+    components: [
+      componentRecord(ids, 'transform', {
+        ...COMPONENT_DEFAULTS.transform,
+        position: input.position ?? defaultPosition(document, 'model'),
+      }),
+      componentRecord(ids, 'mesh', { primitive: 'box', assetId: asset.id }),
+      componentRecord(ids, 'material', COMPONENT_DEFAULTS.material),
+    ],
+  };
+  return {
+    entityId: entity.id,
+    command: {
+      type: 'batch',
+      commands: [
+        ...ensureAssetCommands(document, asset),
+        {
+          type: 'entity.insert',
+          sceneId: input.sceneId,
+          parentId,
+          index: siblings.length,
+          entities: [entity],
+        },
+      ],
+    },
   };
 }

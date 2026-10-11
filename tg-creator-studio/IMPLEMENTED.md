@@ -73,23 +73,44 @@
 
 ## G3 Editor core
 
-| Item                                                                           | Status    | Notes                                           |
-| ------------------------------------------------------------------------------ | --------- | ----------------------------------------------- |
-| Команды с точными inverse, чистое применение, валидация через schema           | Completed | `packages/editor-core/src/commands.ts`          |
-| Undo/Redo история, merge-группы, лимит 200 шагов                               | Completed | drag в схеме = один шаг                         |
-| Selection, dirty по версии, save-тикеты с `mutationId`, conflict-блок          | Completed | `session.ts`                                    |
-| Тесты inverse / invariants / random sequences / 5000 entities                  | Completed | 28 unit-тестов                                  |
-| Studio desktop layout (toolbar, Иерархия, Viewport, Инспектор, нижние вкладки) | Completed | ≥ 1024 px                                       |
-| Studio mobile layout (fullscreen, инструменты, FAB, sheets, панель выделения)  | Completed | действия без клавиатуры                         |
-| Hierarchy: add/delete/duplicate/rename/reparent/reorder/hide/search            | Completed | DnD на desktop, «Переместить в…» везде          |
-| Inspector: Transform и свойства компонентов через command bus                  | Completed | Reset/Copy/Paste компонента                     |
-| Desktop shortcuts                                                              | Completed | Ctrl+S/Z/Shift+Z/Y/D, Delete, F2, Esc, F, Q/W   |
-| Честный save indicator + `PUT draft` + экран конфликта                         | Completed | «Сохранено» только после ответа сервера         |
-| Viewport                                                                       | Partial   | SVG-схема по данным сцены; реальный canvas — G4 |
-| Rotate/Scale gizmo, Orbit, raycast-размещение                                  | Planned   | G4                                              |
-| Автосейв, IndexedDB offline-очередь                                            | Planned   | G5                                              |
-| Resize панелей, Tab, мульти-выделение                                          | Partial   | вкладка нижней панели запоминается              |
-| Blueprint editor / App Builder                                                 | Planned   | G7 / G9                                         |
+| Item                                                                           | Status    | Notes                                         |
+| ------------------------------------------------------------------------------ | --------- | --------------------------------------------- |
+| Команды с точными inverse, чистое применение, валидация через schema           | Completed | `packages/editor-core/src/commands.ts`        |
+| Undo/Redo история, merge-группы, лимит 200 шагов                               | Completed | drag в схеме = один шаг                       |
+| Selection, dirty по версии, save-тикеты с `mutationId`, conflict-блок          | Completed | `session.ts`                                  |
+| Тесты inverse / invariants / random sequences / 5000 entities                  | Completed | 28 unit-тестов                                |
+| Studio desktop layout (toolbar, Иерархия, Viewport, Инспектор, нижние вкладки) | Completed | ≥ 1024 px                                     |
+| Studio mobile layout (fullscreen, инструменты, FAB, sheets, панель выделения)  | Completed | действия без клавиатуры                       |
+| Hierarchy: add/delete/duplicate/rename/reparent/reorder/hide/search            | Completed | DnD на desktop, «Переместить в…» везде        |
+| Inspector: Transform и свойства компонентов через command bus                  | Completed | Reset/Copy/Paste компонента                   |
+| Desktop shortcuts                                                              | Completed | Ctrl+S/Z/Shift+Z/Y/D, Delete, F2, Esc, F, Q/W |
+| Честный save indicator + `PUT draft` + экран конфликта                         | Completed | «Сохранено» только после ответа сервера       |
+| Viewport                                                                       | Completed | G4: PlayCanvas; схема — 2D и без WebGL2       |
+| Rotate/Scale gizmo, Orbit, raycast-размещение                                  | Completed | G4                                            |
+| Автосейв, IndexedDB offline-очередь                                            | Planned   | G5                                            |
+| Resize панелей, Tab, мульти-выделение                                          | Partial   | вкладка нижней панели запоминается            |
+| Blueprint editor / App Builder                                                 | Planned   | G7 / G9                                       |
+
+## G4 3D engine
+
+| Item                                                                        | Status    | Notes                                                |
+| --------------------------------------------------------------------------- | --------- | ---------------------------------------------------- |
+| `engine-3d` адаптер `createScene/applyChanges/select/dispose` на PlayCanvas | Completed | `packages/engine-3d/src/playcanvas/viewport.ts`      |
+| `SceneSync` (diff по ссылкам) → `SceneBackend`                              | Completed | unit: fake backend, random sequences = rebuild       |
+| WebGL2 canvas, сетка, оси, orbit/pan/zoom (мышь, касание, pinch)            | Completed | рендер по требованию                                 |
+| Raycast-выделение, рамка, Иерархия ↔ вьюпорт                                | Completed | OBB мешей, экранный радиус для света/камер           |
+| Gizmo Move/Rotate/Scale + привязка                                          | Completed | прокси; drag = одна `EditorCommand`, один шаг Undo   |
+| Конфликт orbit/touch                                                        | Completed | второй палец не попадает в gizmo (e2e mobile)        |
+| Примитивы (+ Капсула, Конус), Свет, Камера, Material, Инспектор             | Completed | HEX-поле цвета, выбор модели                         |
+| glTF/GLB по `assetRef`                                                      | Completed | встроенные `builtin_*`; свои файлы — G5              |
+| Editor camera vs game camera                                                | Completed | «Камера игры», слой Editor скрыт от игровых камер    |
+| `dispose` ресурсов и обработчиков                                           | Completed | listeners, ResizeObserver, Blob URL, `app.destroy()` |
+| Команды `asset.add/remove`, `batch`                                         | Completed | `editor-core`, 33 unit-теста                         |
+| Playwright desktop + mobile, screenshot smoke                               | Completed | `apps/studio/e2e/viewport3d.spec.ts`                 |
+| Материалы моделей из Inspector                                              | Partial   | модели используют материалы файла                    |
+| Picking моделей по треугольникам                                            | Partial   | сейчас OBB частей                                    |
+| Мульти-выделение, World/Local                                               | Planned   |                                                      |
+| Загрузка моделей, автосейв                                                  | Planned   | G5                                                   |
 
 ## Product vertical (R0/R1)
 

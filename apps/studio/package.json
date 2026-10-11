@@ -2,7 +2,7 @@
   "name": "@tg-creator/studio",
   "version": "0.0.0",
   "private": true,
-  "description": "TG Creator Studio Mini App: auth, dashboard, wizard, settings, scene editor (G3).",
+  "description": "TG Creator Studio Mini App: auth, dashboard, wizard, settings, scene editor with the PlayCanvas 3D viewport (G4).",
   "type": "module",
   "scripts": {
     "build": "tsc -b && vite build",
@@ -18,7 +18,9 @@
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource-variable/onest": "^5.3.1",
     "@fontsource-variable/unbounded": "^5.3.0",
+    "@tg-creator/asset-sdk": "workspace:*",
     "@tg-creator/editor-core": "workspace:*",
+    "@tg-creator/engine-3d": "workspace:*",
     "@tg-creator/project-schema": "workspace:*",
     "@tg-creator/shared": "workspace:*",
     "@tg-creator/telegram": "workspace:*",

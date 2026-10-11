@@ -1,3 +1,4 @@
+import { findBuiltinModel } from '@tg-creator/asset-sdk';
 import { useEffect, useRef } from 'react';
 
 import { useEditorState } from './context.js';
@@ -23,7 +24,12 @@ export function AssetsPanel() {
     <ul className="ed-list" data-testid="assets-panel">
       {assets.map((asset) => (
         <li key={asset.id} className="ed-list__row">
-          <span>{KIND_LABELS[asset.kind]}</span>
+          <span>
+            {KIND_LABELS[asset.kind]}
+            {findBuiltinModel(asset.id)
+              ? ` «${findBuiltinModel(asset.id)?.label ?? ''}» · встроенная`
+              : ''}
+          </span>
           <span className="mono muted">
             {asset.id} · v{asset.version}
           </span>

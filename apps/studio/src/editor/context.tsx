@@ -2,7 +2,7 @@ import type { EditorSession, EditorState } from '@tg-creator/editor-core';
 import type { Vec3 } from '@tg-creator/project-schema';
 import { createContext, useContext, useSyncExternalStore, type MutableRefObject } from 'react';
 
-export type EditorTool = 'select' | 'move';
+export type EditorTool = 'select' | 'move' | 'rotate' | 'scale';
 export type EditorLayout = 'desktop' | 'mobile';
 export type MobileSheet = 'hierarchy' | 'inspector' | 'assets' | 'logic' | 'console' | 'add';
 

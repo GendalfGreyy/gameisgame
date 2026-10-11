@@ -1,6 +1,32 @@
-/**
- * @tg-creator/engine-3d — Planned until its gate (see tg-creator-studio/TASKS.md).
- * G0 only exports a package marker so the monorepo typechecks/builds.
- */
-export const PACKAGE_STATUS = 'Planned' as const;
-export const PACKAGE_NAME = '@tg-creator/engine-3d' as const;
+export {
+  DEFAULT_ORBIT,
+  frameSphere,
+  isOrbitState,
+  normalizeOrbit,
+  orbitBy,
+  orbitPosition,
+  panBy,
+  zoomBy,
+  type OrbitState,
+} from './orbit.js';
+export { rayAabb, rayGround, rayObb, roundTo, wrapDegrees, type V3 } from './picking.js';
+export {
+  SceneSync,
+  type CameraData,
+  type LightData,
+  type MaterialData,
+  type MeshSpec,
+  type SceneBackend,
+  type SyncStats,
+  type TransformData,
+} from './sync.js';
+export {
+  createScene,
+  type SceneViewport,
+  type ScreenPoint,
+  type TransformEvent,
+  type ViewMode,
+  type ViewportOptions,
+  type ViewportTool,
+} from './playcanvas/viewport.js';
+export type { ModelLoader } from './playcanvas/backend.js';

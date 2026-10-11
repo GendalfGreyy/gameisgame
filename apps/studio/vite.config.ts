@@ -4,6 +4,9 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   envDir: '../../',
   plugins: [react()],
+  optimizeDeps: {
+    include: ['@tg-creator/engine-3d > playcanvas'],
+  },
   server: {
     port: 5174,
     host: true,

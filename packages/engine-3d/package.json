@@ -2,7 +2,7 @@
   "name": "@tg-creator/engine-3d",
   "version": "0.0.0",
   "private": true,
-  "description": "PlayCanvas 3D adapter (Planned G4)",
+  "description": "PlayCanvas 3D scene adapter and editor viewport (G4)",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,8 +20,12 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@tg-creator/project-schema": "workspace:*",
+    "playcanvas": "2.23.2"
+  },
   "devDependencies": {
+    "@tg-creator/editor-core": "workspace:*",
     "typescript": "^5.7.2",
     "vitest": "^3.0.4"
   }

@@ -2,29 +2,48 @@
 
 Обновляй статусы на каждом этапе (DoD из `prompts/00-START-HERE.md`).
 
-| Gate | Промпт | Название            | Status    | Notes                                  |
-| ---- | ------ | ------------------- | --------- | -------------------------------------- |
-| G0   | 01     | Infra               | Completed | Monorepo @tg-creator/\* рядом с GiG    |
-| G1   | 02     | Auth + Dashboard    | Completed | S01–S03 + S18 (тема/плотность)         |
-| G2   | 03     | Project schema      | Completed | schema v2, миграция v1→v2, `PUT draft` |
-| G3   | 04     | Editor core         | Completed | команды/Undo, desktop + mobile layout  |
-| G4   | 05     | 3D engine           | Planned   |                                        |
-| G5   | 06     | Assets & Save       | Planned   |                                        |
-| G6   | 07     | Play & Publish      | Planned   |                                        |
-| G7   | 08     | Blueprint           | Planned   |                                        |
-| G8   | 09     | 2D Studio           | Planned   |                                        |
-| G9   | 10     | App Builder         | Planned   |                                        |
-| G10  | 11     | Mobile QA           | Planned   |                                        |
-| G11  | 12     | Production          | Planned   |                                        |
-| G12  | 13     | R2 Collaboration    | Planned   | после G11                              |
-| G12  | 14     | R2 AI / Marketplace | Planned   | после G11                              |
+| Gate | Промпт | Название            | Status    | Notes                                   |
+| ---- | ------ | ------------------- | --------- | --------------------------------------- |
+| G0   | 01     | Infra               | Completed | Monorepo @tg-creator/\* рядом с GiG     |
+| G1   | 02     | Auth + Dashboard    | Completed | S01–S03 + S18 (тема/плотность)          |
+| G2   | 03     | Project schema      | Completed | schema v2, миграция v1→v2, `PUT draft`  |
+| G3   | 04     | Editor core         | Completed | команды/Undo, desktop + mobile layout   |
+| G4   | 05     | 3D engine           | Completed | PlayCanvas viewport, gizmo, game camera |
+| G5   | 06     | Assets & Save       | Planned   |                                         |
+| G6   | 07     | Play & Publish      | Planned   |                                         |
+| G7   | 08     | Blueprint           | Planned   |                                         |
+| G8   | 09     | 2D Studio           | Planned   |                                         |
+| G9   | 10     | App Builder         | Planned   |                                         |
+| G10  | 11     | Mobile QA           | Planned   |                                         |
+| G11  | 12     | Production          | Planned   |                                         |
+| G12  | 13     | R2 Collaboration    | Planned   | после G11                               |
+| G12  | 14     | R2 AI / Marketplace | Planned   | после G11                               |
 
 **Status:** `Planned` | `Partial` | `Completed`
 
 ## Сейчас
 
-- **G0 Infra**, **G1 Auth + Dashboard**, **G2 Project schema**, **G3 Editor core** — Completed, см. `IMPLEMENTED.md`.
-- Следующий шаг: **промпт 05** (3D engine, G4) — только после подтверждения.
+- **G0 Infra**, **G1 Auth + Dashboard**, **G2 Project schema**, **G3 Editor core**, **G4 3D engine** — Completed, см. `IMPLEMENTED.md`.
+- Следующий шаг: **промпт 06** (Assets & Save, G5) — только после подтверждения.
+
+### G4 — что сделано
+
+- [x] `@tg-creator/engine-3d`: PlayCanvas 2.23.2 за интерфейсом `createScene / applyChanges / select / dispose`; движко-независимый `SceneSync` + `PlayCanvasBackend`.
+- [x] WebGL2 canvas, сетка и оси, орбитальная камера (orbit/pan/zoom мышью и касанием), raycast-выделение, рамка выделения, Иерархия ↔ вьюпорт.
+- [x] Gizmo Перемещение/Поворот/Масштаб на прокси: каждый drag — одна Undoable `EditorCommand`, затем документ → адаптер; привязка 0,5 м / 15° / 0,1.
+- [x] Примитивы Куб/Сфера/Плоскость/Цилиндр/Капсула/Конус, Свет, Камера, Material (цвет, roughness, metalness), Инспектор (HEX-поле цвета, выбор модели).
+- [x] glTF/GLB по `assetRef`: встроенные модели `builtin_*` (генерируемый GLB) через настоящий загрузчик; при ошибке — примитив + предупреждение.
+- [x] Editor camera ≠ game camera: «Камера игры», слой Editor не виден игровым камерам; камера редактора хранится локально.
+- [x] Команды `asset.add/remove`, `batch`; корректный `dispose` ресурсов и обработчиков.
+- [x] Тесты: синхронизация адаптера (fake backend, случайные последовательности = полная пересборка), picking/orbit, GLB; Playwright desktop + mobile (pick, move/rotate/scale, материал, Undo/Redo, сохранить/открыть, orbit/pinch без правок документа, скриншоты).
+
+### Перенесено / ограничения G4
+
+- Загрузка своих моделей (Asset API), автосейв, IndexedDB-очередь — G5.
+- Мульти-выделение и групповой gizmo — Planned; переключатель World/Local — Planned.
+- Материалы моделей берутся из файла; компонент Material влияет только на примитив — Partial.
+- Picking моделей — по OBB частей модели (не по треугольникам) — Partial.
+- 2D-вьюпорт (PixiJS) — G8; до тех пор 2D-проекты показывают схему.
 
 ### G3 — что сделано
 
